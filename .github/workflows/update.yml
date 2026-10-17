@@ -1,0 +1,44 @@
+# Wariant hostingu: GitHub Pages. Aktywny dopiero po wrzuceniu projektu do repozytorium GitHub
+# i wlaczeniu Pages (Settings -> Pages -> Source: GitHub Actions).
+# Godziny w UTC: 04:00 UTC = 06:00 latem i 05:00 zima w Polsce; 20:00 UTC = 22:00 latem i 21:00 zima.
+name: Aktualizacja dashboardu
+
+on:
+  schedule:
+    - cron: "0 4 * * *"      # codziennie rano
+    - cron: "0 20 * * 6,0"   # sobota i niedziela wieczorem
+  workflow_dispatch: {}      # reczne uruchomienie z zakladki Actions
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pobierz dane i zbuduj strone
+        shell: pwsh
+        run: ./scripts/update.ps1
+
+      - name: Zapisz dane w repozytorium (historia i cache)
+        run: |
+          git config user.name "smoki-bot"
+          git config user.email "smoki-bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Dane z $(date -u +%F)"
+          git push
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

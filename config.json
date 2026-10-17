@@ -1,0 +1,26 @@
+{
+  "baseUrl": "https://www.kozkosz.pl",
+  "leagueId": 189,
+  "leagueName": "Kadeci U-15 M",
+  "season": "2026/2027",
+  "trackedTeamId": "8385",
+  "trackedPlayerIds": ["103358"],
+  "requestDelayMs": 1000,
+  "shortNames": {
+    "8385": "Wisła",
+    "14653": "MUKS Tarnów",
+    "14797": "UJK Kielce",
+    "14985": "Skawa",
+    "14702": "REGIS II",
+    "14703": "REGIS",
+    "14991": "Oknoplast II",
+    "14710": "Oknoplast",
+    "14629": "IKAR",
+    "14638": "Kadet Oświęcim",
+    "8909": "Korona",
+    "13182": "Korona II",
+    "172": "Limanowa",
+    "14642": "Gorlice",
+    "7435": "WIKAR"
+  }
+}
