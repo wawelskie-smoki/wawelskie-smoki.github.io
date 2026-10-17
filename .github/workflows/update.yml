@@ -1,6 +1,5 @@
-# Codzienna aktualizacja dashboardu i publikacja.
-# Docelowo: Cloudflare Pages za logowaniem Cloudflare Access (zmienna repozytorium CF_ACCESS_READY = true).
-# Do czasu przelaczenia: GitHub Pages.
+# Wariant hostingu: GitHub Pages. Aktywny dopiero po wrzuceniu projektu do repozytorium GitHub
+# i wlaczeniu Pages (Settings -> Pages -> Source: GitHub Actions).
 # Godziny w UTC: 04:00 UTC = 06:00 latem i 05:00 zima w Polsce; 20:00 UTC = 22:00 latem i 21:00 zima.
 name: Aktualizacja dashboardu
 
@@ -18,11 +17,6 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: false
-
-env:
-  CF_PROJECT: wawelskie-smoki
-  CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-  CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
 jobs:
   update:
@@ -42,33 +36,9 @@ jobs:
           git diff --cached --quiet || git commit -m "Dane z $(date -u +%F)"
           git push
 
-      # ---- Cloudflare Pages ----
-      - name: Utworz projekt Cloudflare Pages (jesli nie istnieje)
-        if: env.CF_TOKEN != ''
-        run: |
-          code=$(curl -s -o /tmp/cf.json -w "%{http_code}" -X POST \
-            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/pages/projects" \
-            -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" \
-            --data "{\"name\":\"$CF_PROJECT\",\"production_branch\":\"main\"}")
-          if [ "$code" = "200" ]; then echo "Utworzono projekt $CF_PROJECT";
-          elif grep -q "already exists\|8000002" /tmp/cf.json; then echo "Projekt juz istnieje";
-          else echo "Blad Cloudflare ($code):"; cat /tmp/cf.json; exit 1; fi
-
-      - name: Wdroz na Cloudflare Pages
-        if: env.CF_TOKEN != '' && vars.CF_ACCESS_READY == 'true'
-        uses: cloudflare/wrangler-action@v4.1.3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=wawelskie-smoki --branch=main --commit-dirty=true
-
-      # ---- GitHub Pages (tylko do czasu przelaczenia na Cloudflare) ----
-      - if: vars.CF_ACCESS_READY != 'true'
-        uses: actions/configure-pages@v6
-      - if: vars.CF_ACCESS_READY != 'true'
-        uses: actions/upload-pages-artifact@v5
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
       - id: deployment
-        if: vars.CF_ACCESS_READY != 'true'
         uses: actions/deploy-pages@v5
