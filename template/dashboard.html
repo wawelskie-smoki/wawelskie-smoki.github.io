@@ -125,6 +125,10 @@ main .wrap{padding-block:18px 48px}
 button.bar{cursor:pointer}
 button.bar:hover .nm{color:var(--red)}
 .bar .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .nm.two{display:grid;line-height:1.2}
+.bar .nm.two span{overflow:hidden;text-overflow:ellipsis}
+.bar .sub{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-weight:400}
+.bars.tall{gap:10px}
 .bar .tr{height:14px;background:var(--surface-2);border-radius:3px;overflow:hidden}
 .bar .fl{height:100%;background:var(--bar);border-radius:3px}
 .bar.me .fl{background:var(--red)}
@@ -220,6 +224,9 @@ function cdText(n){if(n==null)return 'termin do ustalenia';if(n===0)return 'dzi�
 function T(id){return D.teams[id]||{id:id,name:'Drużyna '+id,short:'Drużyna '+id};}
 function sn(id){return T(id).short;}
 function srcUrl(path){return 'https://www.kozkosz.pl'+path;}
+function inGames(n){return 'w '+n+' '+(n===1?'meczu':'meczach');}
+function nGames(n){return n+' '+(n===1?'mecz':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?'mecze':'meczów');}
+function statLine(p){return p.pts+' pkt · '+fmt1(p.avg)+' śr. · '+nGames(p.games);}
 function surname(n){var p=String(n).split(' ');return p.length>1?p[0].charAt(0)+'. '+p.slice(1).join(' '):n;}
 
 /* ---------- model ---------- */
@@ -269,7 +276,7 @@ function nextMatch(tid){var t=today().toISOString?null:null;var list=teamMatches
 function isChanged(m){return m.moved||!!changesBy[m.id];}
 
 /* ---------- state ---------- */
-var S={team:D.trackedTeamId,player:(D.trackedPlayerIds||[])[0]||null,tab:'player',sel:null,minGames:1};
+var S={team:D.trackedTeamId,player:(D.trackedPlayerIds||[])[0]||null,tab:'player',sel:null,minGames:1,topMode:'avg'};
 try{var sv=JSON.parse(localStorage.getItem('smoki-state')||'{}');if(sv.team&&D.teams[sv.team])S.team=sv.team;if(sv.player)S.player=sv.player;if(sv.tab)S.tab=sv.tab;}catch(e){}
 var h=(location.hash||'').replace('#','');if(['player','team','league'].indexOf(h)>=0)S.tab=h;
 function save(){try{localStorage.setItem('smoki-state',JSON.stringify({team:S.team,player:S.player,tab:S.tab}));}catch(e){}}
@@ -398,11 +405,12 @@ function renderPlayer(){
   var hist=prof&&prof.history||[],prev=hist.filter(function(h){return h.season!==D.league.season;})[0];
   var last=p.log[p.log.length-1],l3=p.log.slice(-3),f3=l3.reduce(function(a,l){return a+l.pts;},0)/l3.length;
   s+='<div class="kpis">';
-  s+='<div class="kpi hl"><span class="k">Punkty / mecz</span><span class="v">'+fmt1(p.avg)+'</span><span class="s">'+(prev&&prev.games?esc(prev.season)+': '+fmt1(prev.pts/prev.games):p.games+' mecz(e), '+p.pts+' pkt')+'</span></div>';
+  s+='<div class="kpi hl"><span class="k">Punkty / mecz</span><span class="v">'+fmt1(p.avg)+'</span><span class="s">'+(prev&&prev.games?esc(prev.season)+': '+fmt1(prev.pts/prev.games):nGames(p.games)+', '+p.pts+' pkt')+'</span></div>';
+  s+='<div class="kpi"><span class="k">Punkty łącznie</span><span class="v">'+p.pts+'</span><span class="s">'+inGames(p.games)+' · '+p.rank+'. w lidze</span></div>';
   s+='<div class="kpi"><span class="k">Udział w pkt drużyny</span><span class="v">'+pct(share)+'</span><span class="s">'+p.pts+' z '+p.log.reduce(function(a,l){return a+l.teamPts;},0)+'</span></div>';
   s+='<div class="kpi"><span class="k">Ranking ligi (suma)</span><span class="v">'+p.rank+'.</span><span class="s">z '+plist.length+' zawodników</span></div>';
   s+='<div class="kpi"><span class="k">Forma · ost. '+l3.length+'</span><span class="v">'+fmt1(f3)+'</span><span class="s">'+(f3>p.avg+0.5?'powyżej':f3<p.avg-0.5?'poniżej':'na poziomie')+' średniej</span></div>';
-  s+='<div class="kpi"><span class="k">Faule / mecz</span><span class="v">'+fmt1(p.f/p.games)+'</span><span class="s">'+p.log.filter(function(l){return l.f>=4;}).length+' mecz(e) z 4+ faulami</span></div>';
+  s+='<div class="kpi"><span class="k">Faule / mecz</span><span class="v">'+fmt1(p.f/p.games)+'</span><span class="s">'+nGames(p.log.filter(function(l){return l.f>=4;}).length)+' z 4+ faulami</span></div>';
   s+='</div><div class="row2">';
   s+='<div class="panel"><h4>Punkty mecz po meczu</h4><div class="tbl">'+trendSvg(p.log,p.avg)+'</div></div>';
   s+='<div class="panel"><h4>Licznik fauli · '+dDate(last.m.date)+' vs '+esc(sn(last.opp))+'</h4><div class="fouls" aria-label="'+last.f+' z 5 fauli">';
@@ -451,7 +459,7 @@ function renderTeam(){
   if(pl.length){
     var mx=pl[0].pts||1;
     s+='<div class="panel"><h4>Kto zdobywa punkty · sezon</h4><div class="bars">';
-    pl.forEach(function(p){s+='<button class="bar'+(p.id===S.player?' me':'')+'" data-p="'+esc(p.id)+'"><span class="nm">'+(p.nr?'#'+esc(p.nr)+' ':'')+esc(p.name)+'</span><span class="tr"><span class="fl" style="display:block;width:'+(p.pts/mx*100)+'%"></span></span><span class="vl">'+p.pts+'</span></button>';});
+    pl.forEach(function(p){s+='<button class="bar'+(p.id===S.player?' me':'')+'" data-p="'+esc(p.id)+'"><span class="nm two"><span>'+(p.nr?'#'+esc(p.nr)+' ':'')+esc(p.name)+'</span><span class="sub">'+esc(fmt1(p.avg)+' śr. · '+nGames(p.games))+'</span></span><span class="tr"><span class="fl" style="display:block;width:'+(p.pts/mx*100)+'%"></span></span><span class="vl">'+p.pts+'</span></button>';});
     s+='</div><p class="note">Suma punktów w sezonie. Kliknij zawodnika, aby otworzyć jego kartę.</p></div>';
   }
   s+='<div class="row2"><div class="panel"><h4>Grupa '+esc(g?g.letter:'')+'</h4>'+(g?standTable(g.id,tid):'')+'</div>';
@@ -471,7 +479,7 @@ function renderLeague(){
   s+='<div class="kpi"><span class="k">Rozegrane mecze</span><span class="v">'+played.length+'</span><span class="s">z '+matches.length+' w rundzie</span></div>';
   if(big)s+='<div class="kpi"><span class="k">Najwyższy wynik</span><span class="v">'+Math.max(big.sh,big.sa)+'</span><span class="s">'+esc(sn(big.sh>big.sa?big.home:big.away))+' · '+dDate(big.date)+'</span></div>';
   if(close)s+='<div class="kpi hl"><span class="k">Najbardziej wyrównany mecz</span><span class="v">'+Math.abs(close.sh-close.sa)+' pkt</span><span class="s">różnicy · '+esc(sn(close.home))+' – '+esc(sn(close.away))+' '+close.sh+':'+close.sa+' ('+dDate(close.date)+')</span></div>';
-  s+='</div><div class="row2"><div class="panel"><h4>Top strzelcy · śr. pkt</h4><div class="ctl"><label for="mingames">Min. meczów</label><select id="mingames">'+[1,2,3,4,5].map(function(n){return '<option'+(n===S.minGames?' selected':'')+'>'+n+'</option>';}).join('')+'</select></div><div class="bars" id="topbars"></div><p class="note">Zaznaczony zawodnik jest zawsze dopięty do listy.</p></div>';
+  s+='</div><div class="row2"><div class="panel"><h4 id="toptitle">Top strzelcy</h4><div class="ctl"><label for="topmode">Ranking</label><select id="topmode"><option value="avg"'+(S.topMode==='avg'?' selected':'')+'>Średnia</option><option value="sum"'+(S.topMode==='sum'?' selected':'')+'>Suma</option></select><label for="mingames">Min. meczów</label><select id="mingames">'+[1,2,3,4,5].map(function(n){return '<option'+(n===S.minGames?' selected':'')+'>'+n+'</option>';}).join('')+'</select></div><div class="bars" id="topbars"></div><p class="note">Zaznaczony zawodnik jest zawsze dopięty do listy.</p></div>';
   var tl=Object.keys(TS).map(function(k){return TS[k];}).filter(function(t){return t.g>0;}).sort(function(a,b){return (b.pf-b.pa)-(a.pf-a.pa);});
   var mxd=Math.max.apply(null,tl.map(function(t){return Math.abs(t.pf-t.pa);}).concat([1]));
   s+='<div class="panel"><h4>Różnica koszy · wszystkie drużyny</h4><svg viewBox="0 0 420 '+(tl.length*22+10)+'" style="width:100%;height:auto" role="img" aria-label="Różnica koszy drużyn">';
@@ -484,12 +492,15 @@ function renderLeague(){
   if(noBox.length)s+='<div class="warn"><b>Brak protokołu z punktami zawodników:</b> '+noBox.map(function(m){return esc(T(m.home).name)+' – '+esc(T(m.away).name)+' '+m.sh+':'+m.sa+' ('+dDate(m.date)+')';}).join('; ')+'. Wynik jest w tabeli, ale punkty zawodników dojdą po uzupełnieniu protokołu na kozkosz.pl.</div>';
   el.innerHTML=s;
   function tops(){
-    var list=plist.filter(function(p){return p.games>=S.minGames;}).sort(function(a,b){return b.avg-a.avg||b.pts-a.pts;}),top=list.slice(0,10),me=getPlayer(S.player,S.team);
-    if(me&&me.games&&top.indexOf(me)<0)top.push(me);
-    var mx=top.length?Math.max.apply(null,top.map(function(p){return p.avg;})):1;
-    $('topbars').innerHTML=top.map(function(p){return '<div class="bar'+(me&&p.id===me.id?' me':'')+'"><span class="nm">'+esc(surname(p.name))+' · '+esc(sn(p.teamId))+'</span><div class="tr"><div class="fl" style="width:'+(p.avg/mx*100)+'%"></div></div><span class="vl">'+fmt1(p.avg)+'</span></div>';}).join('')||'<p class="note">Brak zawodników z taką liczbą meczów.</p>';
+    var sum=S.topMode==='sum',val=function(p){return sum?p.pts:p.avg;};
+    var list=plist.filter(function(p){return p.games>=S.minGames;}).sort(function(a,b){return sum?(b.pts-a.pts||b.avg-a.avg):(b.avg-a.avg||b.pts-a.pts);}),top=list.slice(0,10),me=getPlayer(S.player,S.team);
+    if(me&&me.games&&top.indexOf(me)<0&&me.games>=S.minGames)top.push(me);
+    var mx=top.length?Math.max.apply(null,top.map(val))||1:1;
+    $('toptitle').textContent='Top strzelcy · '+(sum?'suma pkt':'śr. pkt');
+    $('topbars').innerHTML=top.map(function(p){var pos=list.indexOf(p)+1;return '<div class="bar'+(me&&p.id===me.id?' me':'')+'"><span class="nm two"><span>'+pos+'. '+esc(surname(p.name))+' · '+esc(sn(p.teamId))+'</span><span class="sub">'+esc(sum?fmt1(p.avg)+' śr. · '+nGames(p.games):p.pts+' pkt · '+nGames(p.games))+'</span></span><div class="tr"><div class="fl" style="width:'+(val(p)/mx*100)+'%"></div></div><span class="vl">'+(sum?p.pts:fmt1(p.avg))+'</span></div>';}).join('')||'<p class="note">Brak zawodników z taką liczbą meczów.</p>';
   }
   $('mingames').addEventListener('change',function(e){S.minGames=+e.target.value;tops();});
+  $('topmode').addEventListener('change',function(e){S.topMode=e.target.value;tops();});
   tops();
 }
 
