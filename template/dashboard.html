@@ -281,7 +281,9 @@ $('league-label').textContent=D.league.name+' · KOZKosz '+D.league.season;
   var gs=DOW[g.getDay()]+' '+p(g.getDate())+'.'+p(g.getMonth()+1)+' '+p(g.getHours())+':'+p(g.getMinutes());
   var nx=new Date(g);var wk=g.getDay()===0||g.getDay()===6;
   if(wk&&g.getHours()<22){nx.setHours(22,0,0,0);}else{nx.setDate(nx.getDate()+1);nx.setHours(6,0,0,0);}
-  var ns=DOW[nx.getDay()]+' '+p(nx.getDate())+'.'+p(nx.getMonth()+1)+' '+p(nx.getHours())+':00';
+  var why='';
+  D.matches.forEach(function(m){if(!m.date||!m.time)return;var t=new Date(m.date+'T'+(m.time.length<5?'0':'')+m.time+':00');t.setHours(t.getHours()+2);if(t>g&&t<nx){nx=t;why=' (2 h po meczu)';}});
+  var ns=DOW[nx.getDay()]+' '+p(nx.getDate())+'.'+p(nx.getMonth()+1)+' ok. '+p(nx.getHours())+':'+p(nx.getMinutes())+why;
   $('fresh').innerHTML='<span>Dane z: <b>'+esc(gs)+'</b></span><span>Następna aktualizacja: '+esc(ns)+'</span>';
 })();
 
