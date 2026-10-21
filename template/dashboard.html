@@ -470,7 +470,7 @@ function renderLeague(){
   s+='<div class="kpis"><div class="kpi"><span class="k">Drużyny</span><span class="v">'+Object.keys(D.teams).length+'</span><span class="s">'+D.groups.length+' grupy</span></div>';
   s+='<div class="kpi"><span class="k">Rozegrane mecze</span><span class="v">'+played.length+'</span><span class="s">z '+matches.length+' w rundzie</span></div>';
   if(big)s+='<div class="kpi"><span class="k">Najwyższy wynik</span><span class="v">'+Math.max(big.sh,big.sa)+'</span><span class="s">'+esc(sn(big.sh>big.sa?big.home:big.away))+' · '+dDate(big.date)+'</span></div>';
-  if(close)s+='<div class="kpi hl"><span class="k">Najbliższy mecz</span><span class="v">+'+Math.abs(close.sh-close.sa)+'</span><span class="s">'+esc(sn(close.home))+' – '+esc(sn(close.away))+' '+close.sh+':'+close.sa+'</span></div>';
+  if(close)s+='<div class="kpi hl"><span class="k">Najbardziej wyrównany mecz</span><span class="v">'+Math.abs(close.sh-close.sa)+' pkt</span><span class="s">różnicy · '+esc(sn(close.home))+' – '+esc(sn(close.away))+' '+close.sh+':'+close.sa+' ('+dDate(close.date)+')</span></div>';
   s+='</div><div class="row2"><div class="panel"><h4>Top strzelcy · śr. pkt</h4><div class="ctl"><label for="mingames">Min. meczów</label><select id="mingames">'+[1,2,3,4,5].map(function(n){return '<option'+(n===S.minGames?' selected':'')+'>'+n+'</option>';}).join('')+'</select></div><div class="bars" id="topbars"></div><p class="note">Zaznaczony zawodnik jest zawsze dopięty do listy.</p></div>';
   var tl=Object.keys(TS).map(function(k){return TS[k];}).filter(function(t){return t.g>0;}).sort(function(a,b){return (b.pf-b.pa)-(a.pf-a.pa);});
   var mxd=Math.max.apply(null,tl.map(function(t){return Math.abs(t.pf-t.pa);}).concat([1]));
