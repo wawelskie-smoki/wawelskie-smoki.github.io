@@ -57,6 +57,37 @@ button,select{font:inherit}
 .chips .cd{background:#fff;color:#c00d24;font-weight:500}
 .nm-hall{font-size:14px;color:#ffe1e5}
 .nm-main svg.ballbg{position:absolute;right:-34px;bottom:-44px;width:160px;opacity:.14;pointer-events:none}
+
+/* motywy sezonowe: Halloween (hw) 26.10–1.11, Mikołajki (mk) 1–6.12, Święta (sw) 18.12–6.01 */
+.sd{display:none;pointer-events:none}
+.th-hw .sd.hw,.th-mk .sd.mk,.th-sw .sd.sw{display:block}
+.top{position:relative;overflow:hidden}
+.brand{position:relative}
+.brand .hat{position:absolute;left:4px;top:-12px;width:26px;height:19px}
+.season-chip{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;background:#EF9F27;color:#412402;padding:3px 9px;border-radius:5px;white-space:nowrap}
+.th-mk .season-chip,.th-sw .season-chip{background:#fff;color:#c00d24}
+@media (max-width:560px){.brand{flex-wrap:wrap}.brand .season-chip{flex-basis:100%;width:max-content;max-width:max-content;margin-left:40px}}
+.bats{position:absolute;right:38%;top:4px;width:64px;height:28px}
+.lights{position:absolute;left:0;right:0;bottom:3px;justify-content:space-around}
+.th-sw .lights{display:flex}
+.bulb{width:8px;height:8px;border-radius:50%;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.25}}
+.th-on .nm-main{padding-right:110px}
+.th-on .nm-main svg.ballbg{display:none}
+.nm-main>span,.nm-main>.chips{position:relative;z-index:1}
+.nm-main .sd{position:absolute}
+.nm-main .web{right:0;top:0;width:88px;height:88px}
+.nm-main .pumpkin,.nm-main .santa{right:12px;bottom:10px;width:88px;height:88px}
+.nm-main .gift{right:16px;top:16px;width:40px;height:40px}
+.nm-main .baubles{right:6px;top:0;width:100px;height:150px}
+.nm-main .snow{inset:0}
+.th-mk .nm-main .snow,.th-sw .nm-main .snow{display:block}
+.flake{position:absolute;top:-8px;width:5px;height:5px;border-radius:50%;background:#fff;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(260px)}}
+.chips .slogan{background:#EF9F27;color:#412402}
+.th-mk .chips .slogan,.th-sw .chips .slogan{background:#fff;color:#c00d24}
+.th-hw .gm.next .ball{background:#D85A30;border-color:#D85A30;box-shadow:0 0 0 5px rgba(216,90,48,.25)}
+@media (prefers-reduced-motion:reduce){.flake,.bulb{animation:none}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;align-content:start;min-width:0}
 .panel h4{font-weight:800;font-size:17px}
 .mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -179,8 +210,12 @@ footer a{color:inherit}
 <header class="top"><div class="wrap">
   <div class="brand">
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z" fill="#d3102a"/></svg>
+    <svg class="sd mk sw hat" viewBox="0 0 24 18" aria-hidden="true"><path d="M2 14Q8 0 20 4L16 14z" fill="#E24B4A"/><rect x="0" y="13" width="18" height="4" rx="2" fill="#fff"/><circle cx="21" cy="5" r="3" fill="#fff"/></svg>
     <div><b>Smoczy Box Score</b><span id="league-label"></span></div>
+    <span class="sd hw mk sw season-chip" id="season-chip"></span>
   </div>
+  <svg class="sd hw bats" viewBox="0 0 60 26" aria-hidden="true"><path d="M8 12c-3-4-6-3-8-1 2 0 3 1 3 3 1-1 3-1 5 0 2-1 4-1 5 0 0-2 1-3 3-3-2-2-5-3-8 1z M40 8c-2-3-4-2-6-1 1 0 2 1 2 2 1-1 2-1 4 0 1-1 3-1 4 0 0-1 1-2 2-2-1-1-4-2-6 1z" fill="#B5D4F4"/></svg>
+  <div class="sd lights" id="lights" aria-hidden="true"></div>
   <div class="fresh" id="fresh"></div>
   <div class="filters">
     <label for="f-team">Drużyna<select id="f-team"></select></label>
@@ -282,6 +317,15 @@ var h=(location.hash||'').replace('#','');if(['player','team','league'].indexOf(
 function save(){try{localStorage.setItem('smoki-state',JSON.stringify({team:S.team,player:S.player,tab:S.tab}));}catch(e){}}
 
 /* ---------- header ---------- */
+/* ---------- motyw sezonowy (wg daty u oglądającego; podgląd: ?motyw=hw|mk|sw|no) ---------- */
+var TH={hw:{lab:'Halloweenowy tydzień',slo:'Cukierek albo kosz!'},mk:{lab:'Mikołajki',slo:'Prezent: 2 punkty z kontry'},sw:{lab:'Wesołych Świąt, Smoki',slo:'Spokojnych Świąt i celnych rzutów'}};
+function seasonTheme(d){var m=d.getMonth()+1,day=d.getDate();if((m===10&&day>=26)||(m===11&&day<=1))return 'hw';if(m===12&&day<=6)return 'mk';if((m===12&&day>=18)||(m===1&&day<=6))return 'sw';return 'no';}
+var THC=(location.search.match(/motyw=(hw|mk|sw|no)/)||[])[1]||seasonTheme(new Date());
+if(TH[THC]){
+  document.body.classList.add('th-on','th-'+THC);
+  $('season-chip').textContent=TH[THC].lab;
+  var lc=['#E24B4A','#FAC775','#97C459','#85B7EB'],lh='';for(var li=0;li<16;li++)lh+='<span class="bulb" style="background:'+lc[li%4]+';animation-delay:'+(li%4*0.4)+'s"></span>';$('lights').innerHTML=lh;
+}
 $('league-label').textContent=D.league.name+' · KOZKosz '+D.league.season;
 (function(){
   var g=new Date(D.generatedAt);var p=function(n){return (n<10?'0':'')+n;};
@@ -309,6 +353,16 @@ teamSel.addEventListener('change',function(){S.team=teamSel.value;S.sel=null;if(
 playerSel.addEventListener('change',function(){S.player=playerSel.value;save();renderPlayer();});
 
 /* ---------- band: next match + season line ---------- */
+function decoHtml(){
+  if(!TH[THC])return '';
+  var snow='<div class="sd mk sw snow">';for(var i=0;i<16;i++)snow+='<span class="flake" style="left:'+(i*6+2)+'%;animation-duration:'+(4+i%5)+'s;animation-delay:'+(-i*0.7)+'s;opacity:'+(0.5+(i%3)*0.2)+'"></span>';snow+='</div>';
+  return snow+
+  '<svg class="sd hw web" viewBox="0 0 96 96" aria-hidden="true" fill="none" stroke="#F7C1C1" stroke-width="1"><path d="M96 0L40 0M96 0L96 56M96 0L52 44M96 0L70 52M78 0Q80 12 96 14M60 0Q64 26 96 30M46 0Q50 40 96 44"/><line x1="72" y1="28" x2="72" y2="46"/><circle cx="72" cy="49" r="3" fill="#F7C1C1"/></svg>'+
+  '<svg class="sd hw pumpkin" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 14c2-6 7-9 12-8-4 2-6 5-7 9z" fill="#3B6D11"/><ellipse cx="50" cy="56" rx="40" ry="38" fill="#D85A30"/><path d="M50 18v76M10 56h80M22 26c14 14 14 46 0 60M78 26c-14 14-14 46 0 60" fill="none" stroke="#712B13" stroke-width="2.2"/><path d="M30 46l8-10 8 10z M54 46l8-10 8 10z M28 64q22 18 44 0l-6 4-5-5-5 6-6-6-5 6-5-5-5 5z" fill="#412402"/></svg>'+
+  '<svg class="sd mk santa" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="62" r="34" fill="#D85A30"/><path d="M50 28v68M16 62h68M26 38c12 12 12 36 0 48M74 38c-12 12-12 36 0 48" fill="none" stroke="#712B13" stroke-width="2"/><path d="M18 36Q40 0 80 18L74 36z" fill="#E24B4A"/><rect x="14" y="32" width="66" height="10" rx="5" fill="#fff"/><circle cx="84" cy="18" r="7" fill="#fff"/></svg>'+
+  '<svg class="sd mk gift" viewBox="0 0 44 44" aria-hidden="true"><rect x="4" y="16" width="36" height="26" rx="3" fill="#378ADD"/><rect x="2" y="10" width="40" height="8" rx="2" fill="#185FA5"/><rect x="19" y="10" width="6" height="32" fill="#FAC775"/><path d="M22 10C14 0 8 8 22 10C36 8 30 0 22 10" fill="none" stroke="#FAC775" stroke-width="3"/></svg>'+
+  '<svg class="sd sw baubles" viewBox="0 0 120 170" aria-hidden="true"><line x1="40" y1="0" x2="40" y2="60" stroke="#F7C1C1"/><line x1="90" y1="0" x2="90" y2="95" stroke="#F7C1C1"/><rect x="35" y="58" width="10" height="6" fill="#FAC775"/><circle cx="40" cy="78" r="16" fill="#D85A30"/><path d="M40 62v32M24 78h32M29 66c7 7 7 17 0 24M51 66c-7 7-7 17 0 24" fill="none" stroke="#712B13" stroke-width="1.5"/><rect x="85" y="93" width="10" height="6" fill="#FAC775"/><circle cx="90" cy="120" r="22" fill="#fff"/><path d="M90 104l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#E24B4A"/></svg>';
+}
 function ballSvg(){return '<svg class="ballbg" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="#fff" stroke-width="5"><circle cx="50" cy="50" r="45"/><path d="M5 50h90M50 5v90M18 18c18 18 18 46 0 64M82 18c-18 18-18 46 0 64"/></svg>';}
 function scoutHtml(tid,opp){
   var st=standRow(opp),ts=TS[opp],g=groupOf[opp];
@@ -328,9 +382,9 @@ function renderBand(){
   var tid=S.team,tm=teamMatches(tid),nm=nextMatch(tid),s='';
   if(nm){
     var home=nm.home===tid,opp=home?nm.away:nm.home,dt=daysTo(nm.date);
-    s+='<div class="nextm"><div class="nm-main">'+ballSvg()+'<span class="lab">Następny mecz · '+esc(sn(tid))+' · grupa '+esc(groupOf[tid]?groupOf[tid].letter:'')+' · '+esc(nm.round)+'</span>';
+    s+='<div class="nextm"><div class="nm-main">'+ballSvg()+decoHtml()+'<span class="lab">Następny mecz · '+esc(sn(tid))+' · grupa '+esc(groupOf[tid]?groupOf[tid].letter:'')+' · '+esc(nm.round)+'</span>';
     s+='<span class="nm-vs">'+esc(T(nm.home).name)+'<small>vs</small>'+esc(T(nm.away).name)+'</span>';
-    s+='<div class="chips"><span class="cd">'+esc(cdText(dt))+'</span><span>'+esc(dFull(nm.date))+'</span><span>'+esc(nm.time||'godz. do potwierdzenia')+'</span><span>'+(home?'DOM':'WYJAZD')+'</span>'+(isChanged(nm)?'<span class="cd">zmiana terminu</span>':'')+'</div>';
+    s+='<div class="chips"><span class="cd">'+esc(cdText(dt))+'</span><span>'+esc(dFull(nm.date))+'</span><span>'+esc(nm.time||'godz. do potwierdzenia')+'</span><span>'+(home?'DOM':'WYJAZD')+'</span>'+(isChanged(nm)?'<span class="cd">zmiana terminu</span>':'')+(TH[THC]?'<span class="slogan">'+esc(TH[THC].slo)+'</span>':'')+'</div>';
     s+='<span class="nm-hall">'+esc(nm.hall||'Hala do potwierdzenia')+'</span></div>'+scoutHtml(tid,opp)+'</div>';
   }else{
     var ts=TS[tid];
