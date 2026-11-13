@@ -205,6 +205,8 @@ svg text{font-family:var(--f-mono)}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
 footer .wrap{padding-block:20px;display:grid;gap:4px}
 footer a{color:inherit}
+footer .legal{max-width:80ch}
+footer .legal b{color:var(--ink);font-weight:600}
 </style>
 
 <header class="top"><div class="wrap">
@@ -562,7 +564,9 @@ function renderLeague(){
 var tabs=[].slice.call(document.querySelectorAll('.tab'));
 function setTab(name){S.tab=name;save();tabs.forEach(function(t){var on=t.id==='t-'+name;t.setAttribute('aria-selected',on);$(t.getAttribute('aria-controls')).hidden=!on;});}
 tabs.forEach(function(t){t.addEventListener('click',function(){setTab(t.id.slice(2));});});
-$('foot').innerHTML='<span>Źródło: <a href="'+esc(D.league.source)+'" target="_blank" rel="noopener">kozkosz.pl · '+esc(D.league.name)+' '+esc(D.league.season)+'</a>. Statystyki wyliczone z protokołów meczowych (punkty, celne za 3, faule). Protokoły oznaczone „niezweryfikowane” mogą się jeszcze zmienić.</span><span>Prywatny dashboard drużyny. Nie zawiera dat urodzenia ani danych kontaktowych zawodników.</span>';
+$('foot').innerHTML='<span>Źródło: <a href="'+esc(D.league.source)+'" target="_blank" rel="noopener">kozkosz.pl · '+esc(D.league.name)+' '+esc(D.league.season)+'</a>. Statystyki wyliczone z protokołów meczowych (punkty, celne za 3, faule). Protokoły oznaczone „niezweryfikowane” mogą się jeszcze zmienić.</span><span>Prywatny dashboard drużyny. Nie zawiera dat urodzenia ani danych kontaktowych zawodników.</span>'+
+  '<span class="legal"><b>© '+new Date().getFullYear()+' Smoczy Box Score · Wszelkie prawa zastrzeżone.</b> Kopiowanie, rozpowszechnianie, publikowanie w innych miejscach i wykorzystywanie tej strony, aplikacji lub ich zawartości (układu, grafik, ikon, zestawień i kodu) bez zgody autora jest zabronione. Strona jest udostępniana wyłącznie zawodnikom, rodzicom i sztabowi drużyny. Nie udostępniaj linku osobom spoza tego grona bez zgody autora.</span>'+
+  '<span class="legal">Serwis nie jest oficjalną stroną TS Wisła Kraków ani Krakowskiego Okręgowego Związku Koszykówki. Wyniki i protokoły meczowe pochodzą z kozkosz.pl i pozostają własnością ich wydawcy. Nazwy klubów należą do ich właścicieli.</span>';
 
 function renderAll(){renderBand();renderPlayer();renderTeam();renderLeague();}
 fillTeams();fillPlayers();renderAll();setTab(S.tab);
