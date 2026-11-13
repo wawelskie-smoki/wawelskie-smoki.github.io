@@ -1,0 +1,16 @@
+{
+  "name": "Smoczy Box Score · Wawelskie Smoki U15",
+  "short_name": "Smoki",
+  "description": "Statystyki ligi Kadeci U-15 M KOZKosz z naciskiem na TS Wisła Kraków.",
+  "lang": "pl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12224d",
+  "theme_color": "#12224d",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
