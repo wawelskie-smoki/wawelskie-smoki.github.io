@@ -236,6 +236,15 @@ try {
     }
   }
 
+  # ---- loga klubow (adres z kozkosz.pl; strona uzywa lokalnej kopii static/logos/ID.png, a ten adres jako zapasowy) ----
+  try {
+    $lh = Get-Page "/liga/$L.html"
+    foreach ($lm in [regex]::Matches($lh, 'src="(https://[^"]+/kluby/[^"]+/(\d+)\.(?:jpg|jpeg|png|gif|webp))"')) {
+      $lid = $lm.Groups[2].Value
+      if ($teams.Contains($lid)) { $teams[$lid]['logo'] = $lm.Groups[1].Value }
+    }
+  } catch { [void]$Warnings.Add('Nie udalo sie pobrac adresow logo klubow.') }
+
   # ---- tabele grup ----
   $standings = [ordered]@{}
   $th = Get-Page "/liga/$L/tabela.html"

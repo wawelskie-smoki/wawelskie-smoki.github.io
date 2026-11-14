@@ -24,7 +24,7 @@ $sw = '<script>if("serviceWorker" in navigator&&location.protocol==="https:"){na
 [IO.File]::WriteAllText((Join-Path $dist 'index.html'), $head + $body + $sw + '</body></html>', $Utf8)
 # ikony, manifest i service worker (aplikacja na telefonie)
 $static = Join-Path $Root 'static'
-if (Test-Path $static) { Copy-Item -Path (Join-Path $static '*') -Destination $dist -Force }
+if (Test-Path $static) { Copy-Item -Path (Join-Path $static '*') -Destination $dist -Recurse -Force }
 [IO.File]::WriteAllText((Join-Path $dist 'artifact.html'), $body, $Utf8)
 Write-Host "Zbudowano dist/index.html i dist/artifact.html"
 exit 0

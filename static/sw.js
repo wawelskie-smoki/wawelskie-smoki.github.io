@@ -1,5 +1,5 @@
 // Prosty service worker: zawsze najpierw siec (swieze dane), a bez internetu ostatnio zapisana wersja.
-const CACHE = 'smoki-v1';
+const CACHE = 'smoki-v2';
 const SHELL = ['./', './icon-192.png', './icon-512.png', './manifest.webmanifest'];
 
 self.addEventListener('install', e => {
