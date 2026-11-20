@@ -37,9 +37,19 @@ jobs:
           }
 
       - name: Pobierz dane i zbuduj strone
+        id: upd
         if: steps.check.outputs.run == 'true'
+        continue-on-error: true
         shell: pwsh
         run: ./scripts/update.ps1
+
+      # gdy kozkosz.pl nie odpowiada: zbuduj strone z poprzednimi danymi, zeby zmiany wygladu i tak trafily na strone
+      - name: Zbuduj strone z poprzednimi danymi
+        if: steps.check.outputs.run == 'true' && steps.upd.outcome == 'failure'
+        shell: pwsh
+        run: |
+          Write-Output "::warning::Nie udalo sie pobrac danych z kozkosz.pl - strona zbudowana z poprzednimi danymi."
+          ./scripts/build.ps1
 
       - name: Zapisz dane w repozytorium (historia i cache)
         if: steps.check.outputs.run == 'true'
