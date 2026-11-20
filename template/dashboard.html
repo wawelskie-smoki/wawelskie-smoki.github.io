@@ -621,7 +621,7 @@ function daysTo(iso){if(!iso)return null;var p=iso.split('-');var d=new Date(+p[
 function cdText(n){if(n==null)return 'termin do ustalenia';if(n===0)return 'dziś';if(n===1)return 'jutro';if(n<0)return 'po terminie';return 'za '+n+' dni';}
 function T(id){return D.teams[id]||{id:id,name:'Drużyna '+id,short:'Drużyna '+id};}
 function sn(id){return T(id).short;}
-function srcUrl(path){return 'https://www.kozkosz.pl'+path;}
+function srcUrl(path){return 'https://kozkosz.pl'+path;}
 function inGames(n){return 'w '+n+' '+(n===1?'meczu':'meczach');}
 function nGames(n){return n+' '+(n===1?'mecz':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?'mecze':'meczów');}
 function statLine(p){return p.pts+' pkt · '+fmt1(p.avg)+' śr. · '+nGames(p.games);}
