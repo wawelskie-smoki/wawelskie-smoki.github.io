@@ -478,6 +478,69 @@ footer .wrap{padding-bottom:90px}
 .md-conf i{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;animation:mdf linear forwards}
 @keyframes mdf{to{transform:translateY(105vh) rotate(600deg)}}
 @media (prefers-reduced-motion:reduce){.md-dot{animation:none}.md-conf{display:none}}
+/* ---------- pasek meczów: bieżący na środku, zakładki na środku ---------- */
+.season-line{scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.season-line .gm{scroll-snap-align:center}
+@media (max-width:820px){
+ .track{padding:0 calc(50% - 54px)}
+ .season-line{-webkit-mask-image:linear-gradient(90deg,transparent,#000 26px,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,transparent,#000 26px,#000 calc(100% - 26px),transparent)}
+}
+.tabs{justify-content:center}
+/* ---------- protokół meczu (A) ---------- */
+.bx-q{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:6px 0 4px}
+.bx-q div{border:1px solid var(--line);border-radius:10px;padding:5px 2px;text-align:center;font-family:var(--f-mono)}
+.bx-q small{display:block;font-size:10px;color:var(--muted)}.bx-q b{font:600 14px var(--f-mono);text-transform:none}.bx-q em{display:block;font-style:normal;font-size:10px;color:var(--muted)}
+.bx-q .w{border-color:rgba(60,207,134,.5);background:rgba(60,207,134,.08)}.bx-q .w b{color:var(--good)}
+.bx-seg{display:flex;background:rgba(255,255,255,.06);border-radius:999px;padding:3px;margin:6px 0 2px}
+.bx-seg button{flex:1;min-width:0;border:0;background:none;color:var(--muted);font:600 12.5px var(--f-body);padding:6px 4px;border-radius:999px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-seg button[aria-pressed="true"]{background:#1d2b5c;color:#fff}
+.bx-h,.bx-r{display:grid;grid-template-columns:18px minmax(0,1fr) minmax(24px,90px) 24px 40px 28px;gap:5px;align-items:center}
+@media (max-width:480px){.bx-h,.bx-r{grid-template-columns:18px minmax(0,1fr) minmax(20px,56px) 22px 40px 28px}#mdetail{padding:12px 10px}}
+.bx-h{font:9.5px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:4px 4px;border-bottom:1px solid var(--line)}
+.bx-h span:nth-child(4),.bx-h span:nth-child(6){text-align:right}
+.bx-r{width:100%;background:none;border:0;border-bottom:1px solid rgba(255,255,255,.05);color:var(--ink);font:14px var(--f-body);padding:6px 4px;text-align:left;border-radius:8px}
+button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
+.bx-r .nr{font:11px var(--f-mono);color:var(--muted);text-align:right}
+.bx-r .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bx-r .nm i{font-style:normal;color:#f6c344;margin-right:3px}
+.bx-r .br{height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}.bx-r .br i{display:block;height:100%;background:linear-gradient(90deg,#c20d25,#ff5a6e);border-radius:4px}
+.bx-r .pt{font:600 14px var(--f-mono);text-align:right}.bx-r .sh{font:10.5px var(--f-mono);color:var(--muted);text-align:right}
+.fdots{display:flex;gap:2px}.fdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.12)}.fdots i.on{background:#f0a030}.fdots.out i.on{background:#ff4d4d}
+.bx-r.me{background:rgba(255,42,68,.13)}.bx-r.me .nm{font-weight:700;color:#ffd0d6}
+.bx-r.dim{opacity:.5}
+.bx-note{font:10.5px var(--f-mono);color:var(--muted)}
+/* ---------- sezon w liczbach (B) ---------- */
+.ssn-open{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;color:var(--ink);background:var(--glass);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:12px 16px;font:14px var(--f-body);margin:0 0 16px}
+.ssn-open .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(140deg,#ff2a44,#b10c22);flex:none}
+.ssn-open b{font:800 18px var(--f-display);text-transform:uppercase;display:block;line-height:1.1}
+.ssn-open small{color:var(--muted);font-size:12.5px}.ssn-open .go{margin-left:auto;font:600 18px var(--f-mono);color:#ff8a99}
+.sheet.wide{max-width:820px;max-height:92vh}
+.ssn-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}.ssn-hd h3{margin:0;font:800 20px var(--f-display);text-transform:uppercase;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ssn-hd h3 .lg{margin-right:6px;vertical-align:-5px}
+.ssn-hd button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);color:#fff;border-radius:10px;padding:7px 11px;cursor:pointer;font:600 13px var(--f-body)}
+.ssn-body{overflow:auto;flex:1;min-height:120px;overscroll-behavior:contain;margin:0 -4px;padding:0 4px}
+.mxw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);margin-top:8px}
+.mx{border-collapse:separate;border-spacing:0;font:12.5px var(--f-mono);min-width:100%}
+.mx th,.mx td{padding:6px 4px;text-align:center;white-space:nowrap}
+.mx thead th{font-weight:400;color:var(--muted);border-bottom:1px solid var(--line);vertical-align:bottom;padding-top:8px}
+.mx thead th button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;display:grid;justify-items:center;gap:2px;padding:0;margin:0 auto}
+.mx thead th span{font-size:9.5px}.mx thead th em{font-style:normal;font-size:10.5px}.mx thead th .lg.sm{width:24px;height:24px}
+.mx thead th.w em{color:var(--good)}.mx thead th.l em{color:#ff8a99}
+.mx .pn{position:sticky;left:0;z-index:2;background:#0f1838;text-align:left;font:13px var(--f-body);padding-left:8px;box-shadow:1px 0 0 var(--line)}
+.mx td.pn button{display:flex;align-items:center;gap:5px;width:118px;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer;padding:0;text-align:left}
+.mx td.pn .n{font:10px var(--f-mono);color:var(--muted);width:16px;text-align:right;flex:none}
+.mx td.pn .s{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mx td.pn .a{font:600 13px var(--f-mono);color:#fff;flex:none}
+.mx thead .pn{font:9.5px var(--f-mono);text-transform:uppercase;color:var(--muted)}.mx thead .pn span{float:right;font-size:9.5px}
+.mx td{border-bottom:1px solid rgba(255,255,255,.04);position:relative;min-width:40px}
+.mx td.na{color:rgba(255,255,255,.22)}.mx td.z{color:var(--muted)}
+.mx td.h1{background:rgba(255,42,68,.10)}.mx td.h2{background:rgba(255,42,68,.24)}.mx td.h3{background:rgba(255,42,68,.42);color:#fff}.mx td.h4{background:rgba(255,42,68,.66);color:#fff;font-weight:600}
+.mx td .cr{position:absolute;top:1px;right:2px;font-size:8px;color:#f6c344;font-style:normal}
+.mx .sum{font-weight:600;color:var(--ink);background:rgba(255,255,255,.04)}
+.mx tr.me td.pn{box-shadow:inset 3px 0 0 var(--red),1px 0 0 var(--line)}.mx tr.me td.pn .s{color:#ffd0d6;font-weight:700}
+.mx tr.tot td{border-top:1px solid var(--line);color:var(--muted);font-weight:600}
+.ssn-more{display:block;margin:10px auto 0;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 14px;font:600 13px var(--f-body);cursor:pointer}
+.ssn-lg{display:flex;gap:10px;flex-wrap:wrap;font:10.5px var(--f-mono);color:var(--muted);margin-top:10px}
+.ssn-lg i{display:inline-block;width:12px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:3px}
 </style>
 
 <header class="top"><div class="wrap">
@@ -519,6 +582,11 @@ footer .wrap{padding-bottom:90px}
   <div class="qf" id="qf"><button data-f="all" aria-pressed="true">Wszystko</button><button data-f="t" aria-pressed="false">Drużyny</button><button data-f="p" aria-pressed="false">Zawodnicy</button></div>
   <div class="qres" id="q-res" aria-live="polite"></div>
   <button class="lk-open" id="lk-open">Szatnia · wybierz drużynę i zawodnika z kart</button>
+</div></div>
+<div class="sheet-bg" id="ssn" hidden><div class="sheet wide" role="dialog" aria-modal="true" aria-labelledby="ssn-h">
+  <div class="grab"></div>
+  <div class="ssn-hd"><h3 id="ssn-h">Sezon w liczbach</h3><button id="ssn-close">Zamknij</button></div>
+  <div class="ssn-body" id="ssn-body"></div>
 </div></div>
 <div class="locker" id="locker" role="dialog" aria-modal="true" aria-labelledby="lk-h" hidden><div class="lk-in">
   <p class="eyebrow" id="lk-eb">Witaj w Smoczym Box Score</p>
@@ -854,9 +922,49 @@ function renderBand(){
   s+='</div></div><div class="detail" id="mdetail" aria-live="polite"></div></div>';
   $('band').innerHTML=s;
   if(mdM)mdBind(mdM,tid);
-  [].forEach.call(document.querySelectorAll('#band .gm'),function(b){b.addEventListener('click',function(){S.sel=b.getAttribute('data-m');[].forEach.call(document.querySelectorAll('#band .gm'),function(x){x.setAttribute('aria-pressed',x===b);});detail();});});
+  [].forEach.call(document.querySelectorAll('#band .gm'),function(b){b.addEventListener('click',function(){selMatch(b.getAttribute('data-m'),true);});});
   detail();
+  centerStrip(false);requestAnimationFrame(function(){centerStrip(false);});
 }
+/* bieżący (wybrany / najbliższy) mecz zawsze na środku paska */
+function centerStrip(smooth){
+  var sl=document.querySelector('#band .season-line'),b=sl&&sl.querySelector('.gm[aria-pressed="true"]');if(!b)return;
+  var left=b.offsetLeft+b.offsetWidth/2-sl.clientWidth/2;
+  if(smooth&&sl.scrollTo)sl.scrollTo({left:left,behavior:'smooth'});else sl.scrollLeft=left;
+}
+function selMatch(id,smooth){
+  S.sel=id;[].forEach.call(document.querySelectorAll('#band .gm'),function(x){x.setAttribute('aria-pressed',x.getAttribute('data-m')===id);});
+  detail();centerStrip(smooth);
+}
+var rsT;window.addEventListener('resize',function(){clearTimeout(rsT);rsT=setTimeout(function(){centerStrip(false);},150);});
+window.addEventListener('load',function(){centerStrip(false);});
+/* protokół meczu: punkty i faule obu drużyn */
+var bxSide=null;
+function boxHtml(m,tid){
+  var home=m.home===tid,opp=home?m.away:m.home,side=bxSide&&bxSide.m===m.id?bxSide.t:tid,s='';
+  if(m.quarters){
+    var q=m.quarters.split(',').map(function(x){var a=x.trim().split(':');return [+a[0],+a[1]];}),cm=0,co=0;
+    s+='<div class="bx-q" aria-label="Kwarty z perspektywy '+esc(sn(tid))+'">';
+    q.forEach(function(x,i){var my=home?x[0]:x[1],op=home?x[1]:x[0];cm+=my;co+=op;s+='<div class="'+(my>op?'w':'')+'"><small>Q'+(i+1)+'</small><b>'+my+':'+op+'</b><em>'+cm+':'+co+'</em></div>';});
+    s+='</div>';
+  }
+  s+='<div class="bx-seg" role="group" aria-label="Drużyna w protokole">'+[tid,opp].map(function(t){return '<button data-bx="'+esc(t)+'" aria-pressed="'+(t===side)+'">'+esc(sn(t))+'</button>';}).join('')+'</div>';
+  var rows=((m.box&&m.box[m.home===side?'home':'away'])||[]).slice().sort(function(a,b){return b.pts-a.pts||a.f-b.f;});
+  if(!rows.length)return s+'<span class="chg">Brak protokołu z punktami zawodników dla tej drużyny.</span>';
+  var mx=rows[0].pts||1,tot=rows.reduce(function(a,r){return a+r.pts;},0)||1,own=side===tid;
+  s+='<div><div class="bx-h"><span>#</span><span>zawodnik</span><span>punkty</span><span>pkt</span><span>faule</span><span>udz.</span></div>';
+  rows.forEach(function(r,i){
+    var me=r.pid===S.player,dots='';for(var k=0;k<5;k++)dots+='<i class="'+(k<r.f?'on':'')+'"></i>';
+    var tag=own?'button':'div';
+    s+='<'+tag+' class="bx-r'+(me?' me':'')+(r.pts?'':' dim')+'"'+(own?' data-bp="'+esc(r.pid)+'" aria-label="Karta zawodnika '+esc(r.name)+'"':'')+'><span class="nr">'+esc(r.nr||'')+'</span><span class="nm">'+(i===0&&r.pts?'<i aria-label="najwięcej punktów">★</i>':'')+esc(surname(r.name))+'</span><span class="br"><i style="width:'+(r.pts/mx*100).toFixed(0)+'%"></i></span><span class="pt">'+r.pts+'</span><span class="fdots'+(r.f>=5?' out':'')+'" aria-label="'+r.f+' fauli">'+dots+'</span><span class="sh">'+Math.round(r.pts/tot*100)+'%</span></'+tag+'>';
+  });
+  return s+'</div><span class="bx-note">★ najwięcej punktów · kropki = faule (czerwone: 5, zejście) · udz. = udział w punktach drużyny</span>';
+}
+function bindBox(el,m,tid){
+  [].forEach.call(el.querySelectorAll('[data-bx]'),function(b){b.addEventListener('click',function(){bxSide={m:m.id,t:b.getAttribute('data-bx')};detail();});});
+  [].forEach.call(el.querySelectorAll('[data-bp]'),function(b){b.addEventListener('click',function(){openPlayer(b.getAttribute('data-bp'));});});
+}
+function openPlayer(pid){S.player=pid;playerSel.value=pid;pushRec('p:'+pid);save();updateWho();renderPlayer();renderTeam();detail();setTab('player');$('t-player').scrollIntoView({block:'start',behavior:'smooth'});}
 function detail(){
   var tid=S.team,nm=nextMatch(tid),tm=teamMatches(tid);
   var id=S.sel||(nm?nm.id:(tm.length?tm[tm.length-1].id:null));var m=byId[id];var el=$('mdetail');
@@ -868,7 +976,8 @@ function detail(){
     var best=rows.slice().sort(function(a,b){return b.pts-a.pts;})[0];
     var tp=S.player&&rows.filter(function(r){return r.pid===S.player;})[0];
     if(!rows.length)s+='<span class="chg">Protokół z punktami zawodników nie jest jeszcze wpisany na kozkosz.pl.</span>';
-    s+='<span>'+(my>op?'Wygrana':'Porażka')+' '+my+':'+op+(m.quarters?' · kwarty: '+esc(m.quarters):'')+'.'+(best?' Najwięcej punktów: '+esc(best.name)+' ('+best.pts+').':'')+(tp?' '+esc(tp.name)+': '+tp.pts+' pkt, '+tp.f+' f.':'')+'</span>';
+    s+='<span>'+(my>op?'Wygrana':'Porażka')+' '+my+':'+op+(m.quarters?' · kwarty: '+esc(m.quarters):'')+'.'+(best?' Najwięcej punktów: '+esc(best.name)+' ('+best.pts+').':'')+'</span>';
+    if(m.box)s+=boxHtml(m,tid);
   }else{
     var st=standRow(opp),tops=topScorers(opp,1);
     s+='<span>'+esc(m.hall||'Hala do potwierdzenia')+'.'+(st?' Rywal: '+st.rank+'. w grupie, bilans '+st.w+'–'+st.l+'.':'')+(tops.length?' Lider: '+esc(tops[0].name)+' ('+fmt1(tops[0].avg)+' pkt/m).':'')+'</span>';
@@ -877,6 +986,7 @@ function detail(){
   if(m.moved&&!m.played)s+='<span class="chg">kozkosz.pl oznacza ten mecz jako przełożony.</span>';
   s+='<span><a href="'+esc(srcUrl(m.path))+'" target="_blank" rel="noopener">'+(m.played?'Protokół meczu na kozkosz.pl':'Strona meczu na kozkosz.pl')+'</a></span>';
   el.innerHTML=s;
+  if(m.played&&m.box)bindBox(el,m,tid);
 }
 
 /* ---------- player view ---------- */
@@ -1015,6 +1125,7 @@ function renderTeam(){
   s+='<div class="kpi"><span class="k">Pkt zdobyte / mecz</span><span class="v">'+(ts.g?fmt1(ts.pf/ts.g):'–')+'</span><span class="s">liga: '+(allG?fmt1(allPf/allG):'–')+'</span></div>';
   s+='<div class="kpi"><span class="k">Pkt stracone / mecz</span><span class="v">'+(ts.g?fmt1(ts.pa/ts.g):'–')+'</span><span class="s">różnica '+((ts.pf-ts.pa)>0?'+':'')+(ts.pf-ts.pa)+'</span></div>';
   s+='<div class="kpi"><span class="k">Faule / mecz</span><span class="v">'+(ts.boxGames?fmt1(ts.fouls/ts.boxGames):'–')+'</span><span class="s">z protokołów</span></div></div>';
+  s+=ssnBar(tid);
   s+=fiveHtml(tid);
   var pl=teamPlayers(tid).filter(function(p){return p.games>0;});
   if(pl.length){
@@ -1028,8 +1139,57 @@ function renderTeam(){
   var rp=riv.filter(function(m){return m.played;}).slice(-4),ru=riv.filter(function(m){return !m.played&&(m.date==null||daysTo(m.date)>=0);}).slice(0,4);
   s+='<div class="panel"><h4>Rywale z grupy · wyniki i terminy</h4>'+resList(rp.concat(ru),tid)+'<p class="note">Mecze bez udziału '+esc(sn(tid))+', które zmieniają sytuację w tabeli grupy.</p></div></div>';
   el.innerHTML=s;
+  var so=$('ssn-open');if(so)so.addEventListener('click',function(){openSeason(tid);});
   [].forEach.call(el.querySelectorAll('button[data-p]'),function(b){b.addEventListener('click',function(){S.player=b.getAttribute('data-p');playerSel.value=S.player;pushRec('p:'+S.player);save();renderPlayer();renderTeam();setTab('player');$('t-player').scrollIntoView({block:'start'});});});
 }
+
+/* ---------- sezon w liczbach: tabela zawodnik x mecz ---------- */
+var SS={mode:'pts',all:false};
+function ssnData(tid){
+  var ms=teamMatches(tid).filter(function(m){return m.played;}).slice().reverse();
+  var pl=teamPlayers(tid).filter(function(p){return p.games>0;}).slice().sort(function(a,b){return b.pts-a.pts||b.avg-a.avg;});
+  return {ms:ms,pl:pl};
+}
+function ssnBar(tid){
+  var d=ssnData(tid);if(!d.ms.length||!d.pl.length)return '';
+  var top=d.pl.slice().sort(function(a,b){return b.avg-a.avg;})[0];
+  return '<button class="ssn-open" id="ssn-open" aria-haspopup="dialog"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span><b>Sezon w liczbach</b><small>'+nGames(d.ms.length)+' · '+d.pl.length+' zawodników · lider: '+esc(surname(top.name))+' '+fmt1(top.avg).replace('.',',')+' pkt</small></span><span class="go" aria-hidden="true">▸</span></button>';
+}
+function heat(v,mode){if(v==null)return 'na';if(mode==='f')return v===0?'z':v<=2?'h1':v===3?'h2':v===4?'h3':'h4';return v===0?'z':v<6?'h1':v<12?'h2':v<18?'h3':'h4';}
+function renderSeason(tid){
+  var d=ssnData(tid),f=SS.mode==='f',s='';
+  s+='<div class="bx-seg" role="group" aria-label="Statystyka"><button data-sm="pts" aria-pressed="'+!f+'">Punkty</button><button data-sm="f" aria-pressed="'+f+'">Faule</button></div>';
+  var cell={},best={};
+  d.ms.forEach(function(m){var rows=(m.box&&m.box[m.home===tid?'home':'away'])||null;cell[m.id]={};best[m.id]=0;if(!rows){cell[m.id]=null;return;}rows.forEach(function(r){cell[m.id][r.pid]=r;if(r.pts>best[m.id])best[m.id]=r.pts;});});
+  var pl=d.pl.slice();if(f)pl.sort(function(a,b){return b.f/b.games-a.f/a.games;});
+  var shown=SS.all?pl:pl.slice(0,8),me=pl.filter(function(p){return p.id===S.player;})[0];
+  if(me&&shown.indexOf(me)<0)shown=shown.concat([me]);
+  s+='<div class="mxw"><table class="mx"><thead><tr><th class="pn">Zawodnik<span>'+(f?'f/m':'śr.')+'</span></th>';
+  d.ms.forEach(function(m){var home=m.home===tid,opp=home?m.away:m.home,my=home?m.sh:m.sa,op=home?m.sa:m.sh;
+    s+='<th class="'+(my>op?'w':'l')+'"><button data-sc="'+esc(m.id)+'" aria-label="Protokół: '+esc(sn(opp))+' '+dDate(m.date)+'" title="'+esc(sn(opp))+'"><span>'+dDate(m.date)+'</span>'+logo(opp,'sm')+'<em>'+(my>op?'W ':'P ')+my+':'+op+'</em></button></th>';});
+  s+='<th class="sum">Σ</th></tr></thead><tbody>';
+  shown.forEach(function(p){
+    var av=f?p.f/p.games:p.avg;
+    s+='<tr'+(p.id===S.player?' class="me"':'')+'><td class="pn"><button data-sp="'+esc(p.id)+'"><span class="n">'+esc(p.nr||'')+'</span><span class="s">'+esc(surname(p.name))+'</span><span class="a">'+fmt1(av).replace('.',',')+'</span></button></td>';
+    d.ms.forEach(function(m){var c=cell[m.id];if(!c){s+='<td class="na" title="brak protokołu">?</td>';return;}var r=c[p.id],v=r?(f?r.f:r.pts):null;
+      s+='<td class="'+heat(v,SS.mode)+'">'+(v==null?'·':v)+(!f&&r&&r.pts>0&&r.pts===best[m.id]?'<i class="cr" aria-label="najlepszy w meczu">★</i>':'')+'</td>';});
+    s+='<td class="sum">'+(f?p.f:p.pts)+'</td></tr>';
+  });
+  s+='<tr class="tot"><td class="pn">Drużyna</td>';var tt=0;
+  d.ms.forEach(function(m){var home=m.home===tid,v;if(f){var rows=(m.box&&m.box[home?'home':'away'])||[];v=rows.length?rows.reduce(function(a,r){return a+r.f;},0):'?';}else v=home?m.sh:m.sa;if(typeof v==='number')tt+=v;s+='<td>'+v+'</td>';});
+  s+='<td class="sum">'+tt+'</td></tr></tbody></table></div>';
+  if(pl.length>8)s+='<button class="ssn-more" id="ssn-more">'+(SS.all?'Pokaż top 8':'Pokaż wszystkich ('+pl.length+')')+'</button>';
+  s+='<div class="ssn-lg">'+(f?'<span><i style="background:rgba(255,42,68,.66)"></i>5 fauli</span><span><i style="background:rgba(255,42,68,.24)"></i>3</span>':'<span><i style="background:rgba(255,42,68,.66)"></i>18+ pkt</span><span><i style="background:rgba(255,42,68,.42)"></i>12–17</span><span><i style="background:rgba(255,42,68,.24)"></i>6–11</span><span><span style="color:#f6c344">★</span> najlepszy w meczu</span>')+'<span>· nie grał</span></div>';
+  s+='<p class="note" style="margin-top:8px">Najnowszy mecz z lewej. Dotknij meczu, aby zobaczyć jego protokół, albo zawodnika, aby otworzyć jego kartę. Obróć telefon, żeby zobaczyć więcej meczów.</p>';
+  var el=$('ssn-body');el.innerHTML=s;
+  $('ssn-h').innerHTML=logo(tid,'sm')+'Sezon w liczbach · '+esc(sn(tid));
+  [].forEach.call(el.querySelectorAll('[data-sm]'),function(b){b.addEventListener('click',function(){SS.mode=b.getAttribute('data-sm');renderSeason(tid);});});
+  var mo=$('ssn-more');if(mo)mo.addEventListener('click',function(){SS.all=!SS.all;renderSeason(tid);});
+  [].forEach.call(el.querySelectorAll('[data-sc]'),function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-sc');closeSeason();selMatch(id,false);var dt=$('mdetail');if(dt)dt.scrollIntoView({block:'start',behavior:'smooth'});});});
+  [].forEach.call(el.querySelectorAll('[data-sp]'),function(b){b.addEventListener('click',function(){closeSeason();openPlayer(b.getAttribute('data-sp'));});});
+}
+function openSeason(tid){SS.all=false;renderSeason(tid);$('ssn').hidden=false;lockScroll(true);}
+function closeSeason(){$('ssn').hidden=true;lockScroll(false);}
 
 /* ---------- league view ---------- */
 function renderLeague(){
@@ -1166,7 +1326,8 @@ $('q-res').addEventListener('click',function(e){
   var r=e.target.closest('[data-k]');if(!r)return;var k=r.getAttribute('data-k'),id=k.slice(2);pushRec(k);closeSheet();
   if(k.charAt(0)==='t')choose(id,null,'team');else{var p=findP(id);if(p)choose(p.teamId,p.id,'player');}
 });
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(!$('locker').hidden)closeLocker();else if(!$('sheet').hidden)closeSheet();}});
+$('ssn-close').addEventListener('click',closeSeason);$('ssn').addEventListener('click',function(e){if(e.target===this)closeSeason();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(!$('ssn').hidden)closeSeason();else if(!$('locker').hidden)closeLocker();else if(!$('sheet').hidden)closeSheet();}});
 
 /* Szatnia */
 var LK={t:0,p:0,list:[]},swiped=false;
