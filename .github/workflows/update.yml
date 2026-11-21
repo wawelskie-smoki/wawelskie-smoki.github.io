@@ -9,7 +9,12 @@ on:
     - cron: "0 4 * * *"      # codziennie rano
     - cron: "0 20 * * 6,0"   # sobota i niedziela wieczorem
     - cron: "7,27,47 * * * *" # co 20 min: czy jakis mecz czeka na wynik (GitHub czesto pomija uruchomienia, stad gesto)
-  workflow_dispatch: {}      # reczne uruchomienie z zakladki Actions
+  workflow_dispatch:         # reczne uruchomienie z zakladki Actions
+    inputs:
+      test_check:
+        description: "Test: zachowaj sie jak sprawdzenie co 20 min (aktualizuj tylko, gdy mecz czeka na wynik)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -30,7 +35,7 @@ jobs:
         id: check
         shell: pwsh
         run: |
-          if ('${{ github.event_name }}' -eq 'schedule' -and '${{ github.event.schedule }}' -eq '7,27,47 * * * *') {
+          if ('${{ github.event_name }}' -eq 'schedule' -and '${{ github.event.schedule }}' -eq '7,27,47 * * * *' -or '${{ inputs.test_check }}' -eq 'true') {
             ./scripts/should-run.ps1 | Out-Null
           } else {
             "run=true" | Out-File -Append -Encoding utf8 $env:GITHUB_OUTPUT
