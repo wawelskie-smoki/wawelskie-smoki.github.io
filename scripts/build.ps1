@@ -5,7 +5,15 @@ $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
 $Utf8 = New-Object System.Text.UTF8Encoding $false
 
-$json = [IO.File]::ReadAllText((Join-Path (Join-Path $Root 'data') 'liga.json'), $Utf8)
+# wszystkie roczniki z config.json jako { "u15": {...}, "u14": {...} }
+$Config = [IO.File]::ReadAllText((Join-Path $Root 'config.json'), $Utf8) | ConvertFrom-Json
+$parts = @()
+foreach ($lg in $Config.leagues) {
+  $df = Join-Path (Join-Path $Root 'data') $lg.file
+  if (Test-Path $df) { $parts += ('"' + $lg.key + '":' + [IO.File]::ReadAllText($df, $Utf8).Trim()) }
+}
+if ($parts.Count -eq 0) { Write-Host 'Brak danych do zbudowania strony.'; exit 1 }
+$json = '{' + ($parts -join ',') + '}'
 $json = $json.Replace('</', '<\/')
 $tpl = [IO.File]::ReadAllText((Join-Path (Join-Path $Root 'template') 'dashboard.html'), $Utf8)
 $marker = 'window.SMOKI_DATA = null;'

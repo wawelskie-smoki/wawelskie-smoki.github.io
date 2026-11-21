@@ -1,26 +1,48 @@
 {
   "baseUrl": "https://kozkosz.pl",
-  "leagueId": 189,
-  "leagueName": "Kadeci U-15 M",
   "season": "2026/2027",
   "trackedTeamId": "8385",
-  "trackedPlayerIds": ["103358"],
   "requestDelayMs": 1000,
   "shortNames": {
+    "172": "Limanowa",
+    "7435": "WIKAR",
     "8385": "Wisła",
-    "14653": "MUKS Tarnów",
-    "14797": "UJK Kielce",
-    "14985": "Skawa",
-    "14702": "REGIS II",
-    "14703": "REGIS",
-    "14991": "Oknoplast II",
-    "14710": "Oknoplast",
+    "8909": "Korona",
+    "11557": "Korona II",
+    "13182": "Korona II",
     "14629": "IKAR",
     "14638": "Kadet Oświęcim",
-    "8909": "Korona",
-    "13182": "Korona II",
-    "172": "Limanowa",
     "14642": "Gorlice",
-    "7435": "WIKAR"
-  }
+    "14649": "MUKS Tarnów",
+    "14653": "MUKS Tarnów",
+    "14702": "REGIS II",
+    "14703": "REGIS",
+    "14709": "Oknoplast",
+    "14710": "Oknoplast",
+    "14794": "Starachowice",
+    "14795": "UJK Kielce",
+    "14797": "UJK Kielce",
+    "14985": "Skawa",
+    "14991": "Oknoplast II"
+  },
+  "leagues": [
+    {
+      "key": "u15",
+      "id": 189,
+      "name": "Kadeci U-15 M",
+      "label": "U-15",
+      "file": "liga.json",
+      "trackedPlayerIds": [
+        "103358"
+      ]
+    },
+    {
+      "key": "u14",
+      "id": 190,
+      "name": "Kadeci B U-14 M",
+      "label": "U-14",
+      "file": "liga-u14.json",
+      "trackedPlayerIds": []
+    }
+  ]
 }

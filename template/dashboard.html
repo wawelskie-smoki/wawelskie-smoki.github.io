@@ -541,6 +541,19 @@ button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
 .ssn-more{display:block;margin:10px auto 0;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 14px;font:600 13px var(--f-body);cursor:pointer}
 .ssn-lg{display:flex;gap:10px;flex-wrap:wrap;font:10.5px var(--f-mono);color:var(--muted);margin-top:10px}
 .ssn-lg i{display:inline-block;width:12px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:3px}
+/* ---------- roczniki U-15 / U-14 ---------- */
+.rksw{display:flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:3px;flex:none}
+.rksw button{border:0;background:none;color:#b9c2de;font:600 13px var(--f-mono);padding:6px 12px;border-radius:999px;cursor:pointer;min-height:32px}
+.rksw button[aria-pressed="true"]{color:#fff;background:linear-gradient(140deg,#ff2a44,#b10c22)}
+.rk-u14 .rksw button[aria-pressed="true"]{background:linear-gradient(140deg,#4c7bff,#1d3f9e)}
+@media (max-width:560px){.top .rksw{margin-left:auto}}
+.lk-rk{width:max-content;margin:6px auto 4px}
+.xrk{display:block;width:100%;text-align:left;margin:12px 0 0;background:rgba(61,107,255,.14);border:1px solid rgba(61,107,255,.45);color:#dfe6ff;border-radius:12px;padding:9px 12px;font:13px var(--f-body);cursor:pointer}
+.rk-u14 .xrk{background:rgba(255,42,68,.14);border-color:rgba(255,42,68,.45);color:#ffe0e4}
+.xrk b{font-weight:700}
+.rk-u14 .tab[aria-selected="true"]{background:linear-gradient(140deg,#4c7bff,#1d3f9e);box-shadow:0 10px 24px -8px rgba(29,63,158,.8)}
+.rk-u14 .gm.next .ball{background:radial-gradient(circle at 35% 30%,#9db6ff,#1d3f9e);border-color:#4c7bff;box-shadow:0 0 0 5px rgba(61,107,255,.25)}
+.rk-u14 .fab{background:linear-gradient(140deg,#4c7bff,#1d3f9e);box-shadow:0 14px 30px -8px rgba(29,63,158,.9),inset 0 1px 0 rgba(255,255,255,.3)}
 </style>
 
 <header class="top"><div class="wrap">
@@ -550,6 +563,7 @@ button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
     <div><b>Smoczy Box Score</b><span id="league-label"></span></div>
     <span class="sd hw mk sw season-chip" id="season-chip"></span>
   </div>
+  <div class="rksw" id="rksw" role="group" aria-label="Rocznik"></div>
   <svg class="sd hw bats" viewBox="0 0 60 26" aria-hidden="true"><path d="M8 12c-3-4-6-3-8-1 2 0 3 1 3 3 1-1 3-1 5 0 2-1 4-1 5 0 0-2 1-3 3-3-2-2-5-3-8 1z M40 8c-2-3-4-2-6-1 1 0 2 1 2 2 1-1 2-1 4 0 1-1 3-1 4 0 0-1 1-2 2-2-1-1-4-2-6 1z" fill="#B5D4F4"/></svg>
   <div class="sd lights" id="lights" aria-hidden="true"></div>
   <div class="fresh" id="fresh"></div>
@@ -590,6 +604,7 @@ button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
 </div></div>
 <div class="locker" id="locker" role="dialog" aria-modal="true" aria-labelledby="lk-h" hidden><div class="lk-in">
   <p class="eyebrow" id="lk-eb">Witaj w Smoczym Box Score</p>
+  <div class="rksw lk-rk" id="lk-rk" role="group" aria-label="Rocznik"></div>
   <h2 id="lk-h">Wybierz drużynę</h2>
   <p class="sub">Przesuń logo palcem albo dotknij drużyny obok.</p>
   <div class="carousel" id="lk-car"></div>
@@ -605,7 +620,17 @@ button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
 <script>
 (function(){
 'use strict';
-var D = window.SMOKI_DATA;
+/* roczniki: dane { u15: {...}, u14: {...} }; wybór z ?r=u14 albo zapamiętany */
+var ALL = window.SMOKI_DATA;
+if(ALL&&ALL.matches)ALL={u15:ALL};
+function ld0(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
+var RKS=ALL?Object.keys(ALL):[];
+var RK=(location.search.match(/[?&]r=(u\d\d)/)||[])[1]||ld0('smoki-r')||'u15';
+if(RKS.indexOf(RK)<0)RK=RKS[0];
+var D = ALL&&ALL[RK];
+var KS=RK==='u15'?'':'-'+RK;
+function rkLabel(k){return (ALL[k]&&ALL[k].league&&ALL[k].league.label)||k.replace('u','U-');}
+function goRk(k,pid){if(k===RK&&!pid)return;try{localStorage.setItem('smoki-r',JSON.stringify(k));}catch(e){}location.href=location.pathname+'?r='+k+(pid?'&p='+encodeURIComponent(pid):'');}
 if(!D){document.getElementById('band').innerHTML='<div class="empty">Brak danych. Uruchom scripts\\update.ps1, aby pobrać dane z kozkosz.pl.</div>';return;}
 
 /* ---------- helpers ---------- */
@@ -677,9 +702,20 @@ function isChanged(m){return m.moved||!!changesBy[m.id];}
 
 /* ---------- state ---------- */
 var S={team:D.trackedTeamId,player:(D.trackedPlayerIds||[])[0]||null,tab:'player',sel:null,minGames:1,topMode:'avg'};
-try{var sv=JSON.parse(localStorage.getItem('smoki-state')||'{}');if(sv.team&&D.teams[sv.team])S.team=sv.team;if(sv.player)S.player=sv.player;if(sv.tab)S.tab=sv.tab;}catch(e){}
+try{var sv=JSON.parse(localStorage.getItem('smoki-state'+KS)||'{}');if(sv.team&&D.teams[sv.team])S.team=sv.team;if(sv.player)S.player=sv.player;if(sv.tab)S.tab=sv.tab;}catch(e){}
+var qp=(location.search.match(/[?&]p=(\d+)/)||[])[1];if(qp&&P[qp]){S.player=qp;S.team=P[qp].teamId;S.tab='player';}
+if(!S.player){var tp0=topScorers(S.team,1)[0];if(tp0)S.player=tp0.id;}
 var h=(location.hash||'').replace('#','');if(['player','team','league'].indexOf(h)>=0)S.tab=h;
-function save(){try{localStorage.setItem('smoki-state',JSON.stringify({team:S.team,player:S.player,tab:S.tab}));}catch(e){}}
+function save(){try{localStorage.setItem('smoki-state'+KS,JSON.stringify({team:S.team,player:S.player,tab:S.tab}));localStorage.setItem('smoki-r',JSON.stringify(RK));}catch(e){}}
+document.body.classList.add('rk-'+RK);
+function rkSwitch(el){if(!el)return;if(RKS.length<2){el.hidden=true;return;}
+  el.innerHTML=RKS.map(function(k){return '<button data-rk="'+esc(k)+'" aria-pressed="'+(k===RK)+'">'+esc(rkLabel(k))+'</button>';}).join('');
+  [].forEach.call(el.querySelectorAll('button'),function(b){b.addEventListener('click',function(){goRk(b.getAttribute('data-rk'));});});}
+rkSwitch($('rksw'));rkSwitch($('lk-rk'));
+/* zawodnik grający też w innym roczniku */
+function crossHtml(pid){var out='';RKS.forEach(function(k){if(k===RK)return;var g=0,pts=0;(ALL[k].matches||[]).forEach(function(m){if(!m.box)return;['home','away'].forEach(function(sd){(m.box[sd]||[]).forEach(function(r){if(r.pid===pid){g++;pts+=r.pts;}});});});
+  if(g)out+='<button class="xrk" data-xrk="'+esc(k)+'"><b>Gra też w '+esc(rkLabel(k))+'</b> · '+nGames(g)+' · '+pts+' pkt ('+fmt1(pts/g).replace('.',',')+' śr.) <span aria-hidden="true">→</span></button>';});return out;}
+$('v-player').addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-xrk]');if(b)goRk(b.getAttribute('data-xrk'),S.player);});
 
 /* ---------- header ---------- */
 /* ---------- motyw sezonowy (wg daty u oglądającego; podgląd: ?motyw=hw|mk|sw|no) ---------- */
@@ -1017,7 +1053,7 @@ var TTH={
  gen:{bg:'linear-gradient(160deg,#2f4384 0%,#16224a 55%,#070d22 100%)',acc:'#c9d3f5',
   svg:function(){return '<g fill="none" stroke="#fff" stroke-width="4" opacity="0.18"><circle cx="110" cy="140" r="118"/><path d="M110 22v236M-8 140h236M30 44c50 58 50 134 0 192M190 44c-50 58-50 134 0 192"/></g>';}}
 };
-var TEAM_TH={'8385':['wisla'],'8909':['korona'],'13182':['korona',1],'14629':['ikar'],'14638':['kadet'],'14642':['gorlice'],'14653':['tarnow'],'14703':['regis'],'14702':['regis',1],'14710':['oknoplast'],'14991':['oknoplast',1],'14797':['ujk'],'14985':['skawa'],'172':['limanowa'],'7435':['wikar']};
+var TEAM_TH={'8385':['wisla'],'8909':['korona'],'13182':['korona',1],'14629':['ikar'],'14638':['kadet'],'14642':['gorlice'],'14653':['tarnow'],'14703':['regis'],'14702':['regis',1],'14710':['oknoplast'],'14991':['oknoplast',1],'14797':['ujk'],'14985':['skawa'],'172':['limanowa'],'7435':['wikar'],'11557':['korona',1],'14649':['tarnow'],'14709':['oknoplast'],'14795':['ujk']};
 var thN=0;function teamTheme(tid){var x=TEAM_TH[tid]||['gen'],t=TTH[x[0]];return {bg:t.bg,acc:t.acc,ii:!!x[1],svg:'<svg class="motif" viewBox="0 0 220 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+t.svg(++thN)+'</svg>'};}
 function cardHtml(p,nr,pos){
   var mx=p.log.length?Math.max.apply(null,p.log.map(function(l){return l.pts;})):0;
@@ -1068,7 +1104,7 @@ function renderPlayer(){
   if(hgt)s+='<span>'+esc(hgt)+'</span>';
   if(nr)s+='<span>#'+esc(nr)+'</span>';
   if(teamRank>0)s+='<span>'+teamRank+'. strzelec drużyny</span>';
-  s+='</div><p class="hint">Przechyl telefon albo najedź myszką na kartę. Dotknięcie obraca kartę.</p></div></div>';
+  s+='</div>'+crossHtml(p.id)+'<p class="hint">Przechyl telefon albo najedź myszką na kartę. Dotknięcie obraca kartę.</p></div></div>';
   if(!p.games){el.innerHTML=s+'<div class="empty">Ten zawodnik nie ma jeszcze meczu z protokołem w tym sezonie.</div>';return;}
   var hist=prof&&prof.history||[],prev=hist.filter(function(h){return h.season!==D.league.season;})[0];
   var last=p.log[p.log.length-1],l3=p.log.slice(-3),f3=l3.reduce(function(a,l){return a+l.pts;},0)/l3.length;
@@ -1273,16 +1309,16 @@ function stv(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function norm(s){return String(s||'').toLowerCase().replace(/ł/g,'l').normalize('NFD').replace(/[̀-ͯ]/g,'');}
 function lastName(n){var p=String(n||'').split(' ');return p[p.length-1];}
 function avgTxt(p){return p.games?fmt1(p.avg).replace('.',','):'–';}
-var FAV=ld('smoki-fav',[]),REC=ld('smoki-rec',[]),QF='all';
+var FAV=ld('smoki-fav'+KS,[]),REC=ld('smoki-rec'+KS,[]),QF='all';
 var TEAM_IDS=[];D.groups.forEach(function(g){g.teamIds.forEach(function(t){if(TEAM_IDS.indexOf(t)<0&&D.teams[t])TEAM_IDS.push(t);});});
 TEAM_IDS.sort(function(a,b){return sn(a).localeCompare(sn(b),'pl');});
 var ALLP=null;function allPlayers(){if(!ALLP){ALLP=[];TEAM_IDS.forEach(function(t){teamPlayers(t).forEach(function(p){ALLP.push(p);});});}return ALLP;}
 function findP(id){var a=allPlayers();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
 function hlq(text,q){text=String(text||'');if(!q)return esc(text);var i=norm(text).indexOf(q);if(i<0)return esc(text);return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length));}
 function isFav(k){return FAV.indexOf(k)>=0;}
-function togFav(k){var i=FAV.indexOf(k);if(i>=0)FAV.splice(i,1);else FAV.unshift(k);stv('smoki-fav',FAV);}
-function addFav(k){if(!isFav(k)){FAV.unshift(k);stv('smoki-fav',FAV);}}
-function pushRec(k){REC=[k].concat(REC.filter(function(x){return x!==k;})).slice(0,5);stv('smoki-rec',REC);}
+function togFav(k){var i=FAV.indexOf(k);if(i>=0)FAV.splice(i,1);else FAV.unshift(k);stv('smoki-fav'+KS,FAV);}
+function addFav(k){if(!isFav(k)){FAV.unshift(k);stv('smoki-fav'+KS,FAV);}}
+function pushRec(k){REC=[k].concat(REC.filter(function(x){return x!==k;})).slice(0,5);stv('smoki-rec'+KS,REC);}
 function favBtn(k,lab){return '<button class="fav'+(isFav(k)?' on':'')+'" data-fav="'+k+'" aria-label="'+lab+'" aria-pressed="'+isFav(k)+'">★</button>';}
 function pRow(p,q){var k='p:'+p.id;return '<div class="res'+(p.id===S.player?' hl':'')+'"><button class="rmain" data-k="'+k+'"><span class="num6'+(p.teamId===D.trackedTeamId?'':' g')+'">'+esc(p.nr||'?')+'</span><span class="t"><b>'+hlq(p.name,q)+'</b><span>'+esc(sn(p.teamId))+' · '+(p.games?nGames(p.games):'bez meczów')+'</span></span><span class="val">'+avgTxt(p)+'<small>PKT/M</small></span></button>'+favBtn(k,'Ulubiony zawodnik')+'</div>';}
 function tRow(id,q){var k='t:'+id,t=T(id),g=groupOf[id];return '<div class="res'+(id===S.team?' hl':'')+'"><button class="rmain" data-k="'+k+'">'+logo(id,'md')+'<span class="t"><b>'+hlq(t.short,q)+'</b><span>'+hlq(t.name,q)+(g?' · gr. '+esc(g.letter):'')+'</span></span></button>'+favBtn(k,'Ulubiona drużyna')+'</div>';}
@@ -1368,7 +1404,7 @@ function openLocker(first){
   lkSetTeam(Math.max(0,TEAM_IDS.indexOf(S.team)));
   setTimeout(function(){try{$('lk-pick').focus({preventScroll:true});}catch(e){}},50);
 }
-function closeLocker(){$('locker').hidden=true;lockScroll(false);stv('smoki-onb',1);}
+function closeLocker(){$('locker').hidden=true;lockScroll(false);stv('smoki-onb'+KS,1);}
 function lkPick(){var p=LK.list[LK.p];if(!p)return;addFav('p:'+p.id);pushRec('p:'+p.id);closeLocker();choose(TEAM_IDS[LK.t],p.id,'player');}
 $('lk-pick').addEventListener('click',lkPick);
 $('lk-team').addEventListener('click',function(){var t=TEAM_IDS[LK.t];addFav('t:'+t);pushRec('t:'+t);closeLocker();choose(t,null,'team');});
@@ -1395,6 +1431,6 @@ function fiveHtml(tid){
 
 function renderAll(){renderBand();renderPlayer();renderTeam();renderLeague();}
 fillTeams();fillPlayers();renderAll();setTab(S.tab);
-if(!ld('smoki-onb',0)||/[?&]szatnia/.test(location.search))openLocker(true);
+if((!ld('smoki-onb'+KS,0)&&!qp)||/[?&]szatnia/.test(location.search))openLocker(true);
 })();
 </script>

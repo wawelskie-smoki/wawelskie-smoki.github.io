@@ -2,7 +2,7 @@
 # Uzycie:  powershell -ExecutionPolicy Bypass -File scripts\update.ps1
 # Dziala w Windows PowerShell 5.1 i PowerShell 7 (GitHub Actions). Plik celowo bez polskich znakow.
 
-param([switch]$SkipBuild)
+param([switch]$SkipBuild, [string]$Liga)
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
@@ -11,7 +11,26 @@ try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::
 
 $Config = [IO.File]::ReadAllText((Join-Path $Root 'config.json'), $Utf8) | ConvertFrom-Json
 $Base = $Config.baseUrl
-$L = $Config.leagueId
+
+# bez -Liga: pobierz po kolei wszystkie roczniki z config.json, potem zbuduj strone raz
+if (-not $Liga) {
+  $failed = @()
+  foreach ($lg in $Config.leagues) {
+    & $PSCommandPath -Liga $lg.key -SkipBuild
+    if ($LASTEXITCODE -ne 0) { $failed += $lg.key }
+  }
+  if (-not $SkipBuild) {
+    & (Join-Path $PSScriptRoot 'build.ps1')
+    if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  }
+  if ($failed.Count) { Write-Host "Nieudane roczniki: $($failed -join ', ')"; exit 1 }
+  exit 0
+}
+$LC = $null
+foreach ($lg in $Config.leagues) { if ($lg.key -eq $Liga) { $LC = $lg } }
+if (-not $LC) { Write-Host "Nieznany rocznik: $Liga"; exit 1 }
+$L = $LC.id
+$SkipBuild = $true
 $UA = 'WawelskieSmokiStats/1.0 (prywatny dashboard statystyk U15)'
 $script:Requests = 0
 $Warnings = New-Object System.Collections.ArrayList
@@ -67,10 +86,10 @@ function Pair([string]$s) {
   return @(0, 0)
 }
 
-Log "Start aktualizacji (liga $L)"
+Log "Start aktualizacji ($($LC.label), liga $L)"
 
 # ---- poprzednie dane (cache i wykrywanie zmian terminow) ----
-$DataFile = Join-Path $DataDir 'liga.json'
+$DataFile = Join-Path $DataDir $LC.file
 $Prev = $null
 $PrevMatches = @{}
 if (Test-Path $DataFile) {
@@ -128,8 +147,10 @@ try {
       foreach ($q in @($rd.queues)) {
         foreach ($g in @($q.games)) {
           if (-not $seasonId -and $g.seasonId) { $seasonId = [string]$g.seasonId }
-          $gid = [string]$g.group.id
-          if (-not $grpMap.ContainsKey($gid)) { $grpMap[$gid] = [ordered]@{ id = $gid; name = "$($rd.name): gr. $($g.group.name)"; letter = [string]$g.group.name; teamIds = (New-Object System.Collections.ArrayList) } }
+          # liga bez podzialu na grupy (np. U-14): jedna grupa o id "L<liga>"
+          if ($g.group -and $g.group.id) { $gid = [string]$g.group.id; $gnm = "$($rd.name): gr. $($g.group.name)"; $glt = [string]$g.group.name }
+          else { $gid = "L$L"; $gnm = [string]$rd.name; $glt = [string]$LC.label }
+          if (-not $grpMap.ContainsKey($gid)) { $grpMap[$gid] = [ordered]@{ id = $gid; name = $gnm; letter = $glt; teamIds = (New-Object System.Collections.ArrayList) } }
           foreach ($t in @($g.homeTeam, $g.guestTeam)) {
             $id = [string]$t.id
             if (-not $teams.Contains($id)) {
@@ -278,6 +299,7 @@ try {
     }
     if ($rows.Count -eq 0) { continue }
     $grp = [string]$tb.groupId
+    if (-not $grp -and $grpMap.Count -eq 1) { $grp = @($grpMap.Keys)[0] }
     if ($grpMap.ContainsKey($grp)) { $standings[$grp] = @($rows) } else { [void]$Warnings.Add("Tabela grupy $grp nie pasuje do zadnej grupy.") }
   }
 
@@ -303,7 +325,7 @@ try {
 
   # ---- profile sledzonych zawodnikow (rocznik tylko jako rok, bez pelnej daty urodzenia) ----
   $profiles = [ordered]@{}
-  foreach ($plId in $Config.trackedPlayerIds) {
+  foreach ($plId in @($LC.trackedPlayerIds)) {
     $pr = Get-Rsc (Get-Page "/liga/$L/sezon/$seasonId/zawodnicy/p/$plId/$(if ($pslug[[string]$plId]) { $pslug[[string]$plId] } else { 'zawodnik' })")
     $prof = [ordered]@{ id = [string]$plId; born = $null; height = $null; position = $null; number = $numbers[[string]$plId]; history = @() }
     $pj = Get-JsonAt $pr 'player'
@@ -333,9 +355,9 @@ try {
   # ---- zapis ----
   $data = [ordered]@{
     generatedAt = $nowIso
-    league = [ordered]@{ id = $L; name = $Config.leagueName; season = $Config.season; source = "$Base/centrum-meczow/liga?leagueId=$L&tab=schedule" }
+    league = [ordered]@{ id = $L; name = $LC.name; key = $LC.key; label = $LC.label; season = $Config.season; source = "$Base/centrum-meczow/liga?leagueId=$L&tab=schedule" }
     trackedTeamId = $tracked
-    trackedPlayerIds = @($Config.trackedPlayerIds | ForEach-Object { [string]$_ })
+    trackedPlayerIds = @(@($LC.trackedPlayerIds) | ForEach-Object { [string]$_ })
     groups = @($groups)
     teams = $teams
     matches = @($games)
@@ -348,7 +370,7 @@ try {
   }
   $json = ConvertTo-Json -InputObject $data -Depth 12 -Compress
   [IO.File]::WriteAllText($DataFile, $json, $Utf8)
-  [IO.File]::WriteAllText((Join-Path $HistDir ((Get-Date -Format 'yyyy-MM-dd') + '.json')), $json, $Utf8)
+  [IO.File]::WriteAllText((Join-Path $HistDir ((Get-Date -Format 'yyyy-MM-dd') + $(if ($LC.key -eq 'u15') { '' } else { '-' + $LC.key }) + '.json')), $json, $Utf8)
   Log "Zapisano dane: zapytan $($script:Requests), ostrzezen $($Warnings.Count)"
 } catch {
   Log "BLAD: $($_.Exception.Message) - poprzednie dane pozostaja bez zmian."

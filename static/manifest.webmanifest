@@ -1,7 +1,7 @@
 {
-  "name": "Smoczy Box Score · Wawelskie Smoki U15",
+  "name": "Smoczy Box Score · Wawelskie Smoki",
   "short_name": "Smoki",
-  "description": "Statystyki ligi Kadeci U-15 M KOZKosz z naciskiem na TS Wisła Kraków.",
+  "description": "Statystyki lig Kadeci U-15 M i Kadeci B U-14 M KOZKosz z naciskiem na TS Wisła Kraków.",
   "lang": "pl",
   "start_url": "./",
   "scope": "./",

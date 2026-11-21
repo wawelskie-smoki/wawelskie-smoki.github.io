@@ -12,7 +12,7 @@ param([string]$Now)
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
 $Utf8 = New-Object System.Text.UTF8Encoding $false
-$data = [IO.File]::ReadAllText((Join-Path (Join-Path $Root 'data') 'liga.json'), $Utf8) | ConvertFrom-Json
+$Config = [IO.File]::ReadAllText((Join-Path $Root 'config.json'), $Utf8) | ConvertFrom-Json
 
 $tz = $null
 foreach ($id in @('Europe/Warsaw', 'Central European Standard Time')) {
@@ -22,22 +22,27 @@ if (-not $tz) { throw 'Brak strefy czasowej Europe/Warsaw' }
 
 $nowUtc = if ($Now) { ([DateTimeOffset]::Parse($Now)).UtcDateTime } else { [DateTime]::UtcNow }
 
-$genUtc = $null
-try { $genUtc = ([DateTimeOffset]::Parse([string]$data.generatedAt)).UtcDateTime } catch {}
 $run = $false
 $reasons = @()
-foreach ($m in $data.matches) {
+foreach ($lg in $Config.leagues) {
+ $df = Join-Path (Join-Path $Root 'data') $lg.file
+ if (-not (Test-Path $df)) { $run = $true; $reasons += "brak danych rocznika $($lg.label)"; continue }
+ $data = [IO.File]::ReadAllText($df, $Utf8) | ConvertFrom-Json
+ $genUtc = $null
+ try { $genUtc = ([DateTimeOffset]::Parse([string]$data.generatedAt)).UtcDateTime } catch {}
+ foreach ($m in $data.matches) {
   if (-not $m.date -or -not $m.time) { continue }
   $local = [DateTime]::ParseExact("$($m.date) $($m.time)", 'yyyy-MM-dd H:mm', [Globalization.CultureInfo]::InvariantCulture)
   $startUtc = [TimeZoneInfo]::ConvertTimeToUtc([DateTime]::SpecifyKind($local, 'Unspecified'), $tz)
   $hours = ($nowUtc - $startUtc).TotalHours
   $rows = @($m.box.home).Count + @($m.box.away).Count
   $missing = (-not $m.played) -or ($rows -eq 0)
-  $label = "$($m.date) $($m.time) $($data.teams.($m.home).short) - $($data.teams.($m.away).short)"
+  $label = "$($lg.label) $($m.date) $($m.time) $($data.teams.($m.home).short) - $($data.teams.($m.away).short)"
   if ($hours -lt 2 -or $hours -ge 12) { continue }
   $stale = (-not $genUtc) -or ($genUtc -lt $startUtc.AddHours(2))
   if ($missing) { $run = $true; $reasons += "brak wyniku/protokolu ($([math]::Round($hours,1)) h po meczu): $label" }
   elseif ($stale) { $run = $true; $reasons += "dane sprzed konca meczu: $label" }
+ }
 }
 
 if ($reasons.Count) { $reasons | ForEach-Object { Write-Host $_ } } else { Write-Host 'Brak meczow czekajacych na wynik - pomijam aktualizacje.' }
