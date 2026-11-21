@@ -547,7 +547,22 @@ button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
 .rksw button[aria-pressed="true"]{color:#fff;background:linear-gradient(140deg,#ff2a44,#b10c22)}
 .rk-u14 .rksw button[aria-pressed="true"]{background:linear-gradient(140deg,#4c7bff,#1d3f9e)}
 @media (max-width:560px){.top .rksw{margin-left:auto}}
-.lk-rk{width:max-content;margin:6px auto 4px}
+/* Szatnia: kroki rocznik -> drużyna -> zawodnik */
+.lk-steps{display:flex;justify-content:center;gap:6px;margin:8px 0 6px}
+.lk-steps i{font:600 11px var(--f-mono);font-style:normal;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);color:var(--muted)}
+.lk-steps i.on{color:#fff;background:rgba(255,42,68,.28);border-color:rgba(255,64,87,.7)}
+.lk-steps i.done{color:#7ee2a8;border-color:rgba(60,207,134,.45)}
+.lk-steps i.done::before{content:"✓ "}
+.lk-rkc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 4px}
+.lk-rc{border:0;cursor:pointer;border-radius:20px;padding:22px 8px;color:#fff;display:grid;gap:2px;justify-items:center;font:13px var(--f-body);box-shadow:0 16px 30px -14px rgba(0,0,0,.8);transition:transform .15s}
+.lk-rc:active{transform:scale(.97)}
+.lk-rc b{font:900 44px var(--f-display);line-height:1}
+.lk-rc span{opacity:.85;font-size:12px}
+.lk-rc.rc-u15{background:linear-gradient(150deg,#ff2a44,#7a0717)}
+.lk-rc.rc-u14{background:linear-gradient(150deg,#4c7bff,#14286b)}
+.lk-rc.cur{outline:3px solid #fff;outline-offset:3px}
+.lk-cont{display:block;width:100%;margin-top:18px;border-radius:14px;padding:13px;cursor:pointer;background:rgba(255,255,255,.07);border:1px dashed rgba(255,255,255,.3);color:var(--ink);font:600 14px var(--f-body)}
+.lk-back{display:block;margin:2px auto 8px;background:none;border:1px solid rgba(255,255,255,.18);color:#c9d2f0;border-radius:999px;padding:6px 14px;cursor:pointer;font:600 12px var(--f-mono)}
 .xrk{display:block;width:100%;text-align:left;margin:12px 0 0;background:rgba(61,107,255,.14);border:1px solid rgba(61,107,255,.45);color:#dfe6ff;border-radius:12px;padding:9px 12px;font:13px var(--f-body);cursor:pointer}
 .rk-u14 .xrk{background:rgba(255,42,68,.14);border-color:rgba(255,42,68,.45);color:#ffe0e4}
 .xrk b{font-weight:700}
@@ -604,7 +619,15 @@ button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
 </div></div>
 <div class="locker" id="locker" role="dialog" aria-modal="true" aria-labelledby="lk-h" hidden><div class="lk-in">
   <p class="eyebrow" id="lk-eb">Witaj w Smoczym Box Score</p>
-  <div class="rksw lk-rk" id="lk-rk" role="group" aria-label="Rocznik"></div>
+  <div class="lk-steps" id="lk-steps" aria-hidden="true"><i data-s="1">Rocznik</i><i data-s="2">Drużyna</i><i data-s="3">Zawodnik</i></div>
+  <div id="lk-s1" hidden>
+    <h2>Wybierz rocznik</h2>
+    <p class="sub">Dotknij karty rocznika.</p>
+    <div class="lk-rkc" id="lk-rkc"></div>
+    <button class="lk-cont" id="lk-cont"></button>
+  </div>
+  <div id="lk-s2">
+  <button class="lk-back" id="lk-back"></button>
   <h2 id="lk-h">Wybierz drużynę</h2>
   <p class="sub">Przesuń logo palcem albo dotknij drużyny obok.</p>
   <div class="carousel" id="lk-car"></div>
@@ -614,6 +637,7 @@ button.bx-r{cursor:pointer}button.bx-r:hover{background:rgba(255,255,255,.04)}
   <div class="lk-nav"><button id="lk-prev" aria-label="Poprzedni zawodnik">‹</button><span id="lk-cnt"></span><button id="lk-next" aria-label="Następny zawodnik">›</button></div>
   <button class="lk-pick" id="lk-pick"></button>
   <div class="lk-act"><button id="lk-team">Tylko drużyna</button><button id="lk-skip">Pomiń</button></div>
+  </div>
 </div></div>
 
 <script>window.SMOKI_DATA = null;</script>
@@ -711,7 +735,7 @@ document.body.classList.add('rk-'+RK);
 function rkSwitch(el){if(!el)return;if(RKS.length<2){el.hidden=true;return;}
   el.innerHTML=RKS.map(function(k){return '<button data-rk="'+esc(k)+'" aria-pressed="'+(k===RK)+'">'+esc(rkLabel(k))+'</button>';}).join('');
   [].forEach.call(el.querySelectorAll('button'),function(b){b.addEventListener('click',function(){goRk(b.getAttribute('data-rk'));});});}
-rkSwitch($('rksw'));rkSwitch($('lk-rk'));
+rkSwitch($('rksw'));
 /* zawodnik grający też w innym roczniku */
 function crossHtml(pid){var out='';RKS.forEach(function(k){if(k===RK)return;var g=0,pts=0;(ALL[k].matches||[]).forEach(function(m){if(!m.box)return;['home','away'].forEach(function(sd){(m.box[sd]||[]).forEach(function(r){if(r.pid===pid){g++;pts+=r.pts;}});});});
   if(g)out+='<button class="xrk" data-xrk="'+esc(k)+'"><b>Gra też w '+esc(rkLabel(k))+'</b> · '+nGames(g)+' · '+pts+' pkt ('+fmt1(pts/g).replace('.',',')+' śr.) <span aria-hidden="true">→</span></button>';});return out;}
@@ -1396,15 +1420,37 @@ $('lk-fan').addEventListener('click',function(e){if(swiped)return;var b=e.target
 $('lk-prev').addEventListener('click',function(){lkMoveP(-1);});
 $('lk-next').addEventListener('click',function(){lkMoveP(1);});
 $('locker').addEventListener('keydown',function(e){if(e.key==='ArrowLeft')lkMoveP(-1);else if(e.key==='ArrowRight')lkMoveP(1);});
-function openLocker(first){
-  $('lk-eb').textContent=first?'Witaj w Smoczym Box Score':'Szatnia';
-  $('lk-h').textContent=first?'Wybierz swoją drużynę i zawodnika':'Wybierz drużynę i zawodnika';
-  $('lk-skip').textContent=first?'Pomiń':'Zamknij';
-  closeSheet();$('locker').hidden=false;lockScroll(true);$('locker').scrollTop=0;
-  lkSetTeam(Math.max(0,TEAM_IDS.indexOf(S.team)));
-  setTimeout(function(){try{$('lk-pick').focus({preventScroll:true});}catch(e){}},50);
+/* Szatnia w krokach: 1 rocznik -> 2 drużyna i zawodnik (dotychczasowa karuzela i karty) */
+function lkStep(n){
+  $('lk-s1').hidden=n!==1;$('lk-s2').hidden=n===1;
+  [].forEach.call($('lk-steps').querySelectorAll('i'),function(i){var s=+i.getAttribute('data-s');i.className=(n===1?s===1:s>1)?'on':(s<n?'done':'');});
+  $('locker').scrollTop=0;
+  if(n===1){
+    $('lk-rkc').innerHTML=RKS.map(function(k){var d=ALL[k],nt=Object.keys(d.teams||{}).length;
+      return '<button class="lk-rc rc-'+esc(k)+(k===RK?' cur':'')+'" data-rk="'+esc(k)+'"><span>'+esc(String(d.league.name||'').replace(/\s*U-\d+.*$/,''))+'</span><b>'+esc(rkLabel(k))+'</b><span>'+nt+' drużyn'+(k===RK?' · ostatnio':'')+'</span></button>';}).join('');
+    var p=getPlayer(S.player,S.team);
+    $('lk-cont').textContent='Kontynuuj: '+rkLabel(RK)+' · '+sn(S.team)+(p?' · '+(p.nr?'#'+p.nr+' ':'')+surname(p.name):'');
+    setTimeout(function(){try{$('lk-cont').focus({preventScroll:true});}catch(e){}},50);
+  }else{
+    $('lk-back').textContent='‹ Rocznik '+rkLabel(RK)+' · zmień';
+    lkSetTeam(Math.max(0,TEAM_IDS.indexOf(S.team)));
+    setTimeout(function(){try{$('lk-pick').focus({preventScroll:true});}catch(e){}},50);
+  }
 }
-function closeLocker(){$('locker').hidden=true;lockScroll(false);stv('smoki-onb'+KS,1);}
+function openLocker(first,step){
+  $('lk-eb').textContent=first?'Witaj w Smoczym Box Score':'Szatnia';
+  $('lk-h').textContent='Wybierz drużynę i zawodnika';
+  $('lk-skip').textContent=first?'Pomiń':'Zamknij';
+  closeSheet();$('locker').hidden=false;lockScroll(true);
+  lkStep(RKS.length>1?(step||1):2);
+}
+$('lk-rkc').addEventListener('click',function(e){var b=e.target.closest('[data-rk]');if(!b)return;var k=b.getAttribute('data-rk');
+  if(k===RK){lkStep(2);return;}
+  try{localStorage.setItem('smoki-r',JSON.stringify(k));sessionStorage.setItem('smoki-sz','1');}catch(e2){}
+  location.href=location.pathname+'?r='+k+'&szatnia=2';});
+$('lk-cont').addEventListener('click',closeLocker);
+$('lk-back').addEventListener('click',function(){lkStep(1);});
+function closeLocker(){$('locker').hidden=true;lockScroll(false);stv('smoki-onb',1);}
 function lkPick(){var p=LK.list[LK.p];if(!p)return;addFav('p:'+p.id);pushRec('p:'+p.id);closeLocker();choose(TEAM_IDS[LK.t],p.id,'player');}
 $('lk-pick').addEventListener('click',lkPick);
 $('lk-team').addEventListener('click',function(){var t=TEAM_IDS[LK.t];addFav('t:'+t);pushRec('t:'+t);closeLocker();choose(t,null,'team');});
@@ -1431,6 +1477,20 @@ function fiveHtml(tid){
 
 function renderAll(){renderBand();renderPlayer();renderTeam();renderLeague();}
 fillTeams();fillPlayers();renderAll();setTab(S.tab);
-if((!ld('smoki-onb'+KS,0)&&!qp)||/[?&]szatnia/.test(location.search))openLocker(true);
+/* kiedy pokazać Szatnię:
+   - ?szatnia=2 po zmianie rocznika w Szatni -> od razu krok drużyny i zawodnika
+   - ?szatnia -> od kroku rocznika
+   - pierwsza wizyta albo każde uruchomienie aplikacji z ikony (raz na sesję, więc odświeżenie strony jej nie otwiera)
+   - nie przy otwarciu wysłanego linku z rocznikiem lub zawodnikiem (?r=, ?p=) */
+(function(){
+  var q=location.search,app=false,seen=false;
+  try{app=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;}catch(e){}
+  try{seen=!!sessionStorage.getItem('smoki-sz');sessionStorage.setItem('smoki-sz','1');}catch(e){}
+  var clean=function(){try{history.replaceState(null,'',location.pathname+location.search.replace(/[?&]szatnia(=\d)?/,'').replace(/^&/,'?')+location.hash);}catch(e){}};
+  if(/[?&]szatnia=2/.test(q)){clean();openLocker(false,2);return;}
+  if(/[?&]szatnia/.test(q)){clean();openLocker(true,1);return;}
+  var linked=/[?&](r|p)=/.test(q);
+  if(!linked&&(!ld('smoki-onb',0)||(app&&!seen)))openLocker(!ld('smoki-onb',0),1);
+})();
 })();
 </script>
