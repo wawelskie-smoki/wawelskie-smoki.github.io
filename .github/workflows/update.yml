@@ -71,6 +71,9 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+      # GitHub nie widzi artefaktu od razu po wgraniu - krotka pauza przed wdrozeniem
+      - if: steps.check.outputs.run == 'true'
+        run: sleep 20
       - id: deployment
         if: steps.check.outputs.run == 'true'
         continue-on-error: true
