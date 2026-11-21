@@ -1,6 +1,8 @@
 # Decyduje, czy cogodzinne uruchomienie ma robic pelna aktualizacje.
-# Tak, gdy jakis mecz ligi zaczal sie 2-3 godziny temu, albo 4-5 godzin temu
-# i nadal nie ma wyniku lub protokolu z punktami zawodnikow.
+# Tak, gdy jakis mecz ligi zaczal sie 2-12 godzin temu i:
+#  - nie ma jeszcze wyniku lub protokolu z punktami zawodnikow, albo
+#  - dane nie byly odswiezane od 2 h po rozpoczeciu meczu.
+# Szerokie okno, bo GitHub czesto pomija zaplanowane uruchomienia (cron) - waskie okno 2-3 h bylo przegapiane.
 # Nie wysyla zapytan do kozkosz.pl - czyta tylko data/liga.json.
 # Wynik: wypisuje "true"/"false" i (w GitHub Actions) zapisuje run=... do GITHUB_OUTPUT.
 # Test lokalny:  powershell -File scripts\should-run.ps1 -Now '2026-10-21T20:30:00+02:00'
@@ -20,6 +22,8 @@ if (-not $tz) { throw 'Brak strefy czasowej Europe/Warsaw' }
 
 $nowUtc = if ($Now) { ([DateTimeOffset]::Parse($Now)).UtcDateTime } else { [DateTime]::UtcNow }
 
+$genUtc = $null
+try { $genUtc = ([DateTimeOffset]::Parse([string]$data.generatedAt)).UtcDateTime } catch {}
 $run = $false
 $reasons = @()
 foreach ($m in $data.matches) {
@@ -30,11 +34,13 @@ foreach ($m in $data.matches) {
   $rows = @($m.box.home).Count + @($m.box.away).Count
   $missing = (-not $m.played) -or ($rows -eq 0)
   $label = "$($m.date) $($m.time) $($data.teams.($m.home).short) - $($data.teams.($m.away).short)"
-  if ($hours -ge 2 -and $hours -lt 3) { $run = $true; $reasons += "2 h po meczu: $label" }
-  elseif ($hours -ge 4 -and $hours -lt 5 -and $missing) { $run = $true; $reasons += "ponowienie 4 h po meczu: $label" }
+  if ($hours -lt 2 -or $hours -ge 12) { continue }
+  $stale = (-not $genUtc) -or ($genUtc -lt $startUtc.AddHours(2))
+  if ($missing) { $run = $true; $reasons += "brak wyniku/protokolu ($([math]::Round($hours,1)) h po meczu): $label" }
+  elseif ($stale) { $run = $true; $reasons += "dane sprzed konca meczu: $label" }
 }
 
-if ($reasons.Count) { $reasons | ForEach-Object { Write-Host $_ } } else { Write-Host 'Brak meczow 2 h temu - pomijam aktualizacje.' }
+if ($reasons.Count) { $reasons | ForEach-Object { Write-Host $_ } } else { Write-Host 'Brak meczow czekajacych na wynik - pomijam aktualizacje.' }
 $out = if ($run) { 'true' } else { 'false' }
 if ($env:GITHUB_OUTPUT) { [IO.File]::AppendAllText($env:GITHUB_OUTPUT, "run=$out`n", $Utf8) }
 Write-Output $out
