@@ -1,5 +1,6 @@
 # Decyduje, czy cogodzinne uruchomienie ma robic pelna aktualizacje.
-# Tak, gdy jakis mecz ligi zaczal sie 2-12 godzin temu i:
+# Tak, gdy minal staly termin odswiezenia (04:00 UTC, weekend tez 20:00 UTC), a dane sa starsze,
+# gdy brak wyniku 12-72 h po meczu (co 3 h), albo gdy jakis mecz zaczal sie 2-12 godzin temu i:
 #  - nie ma jeszcze wyniku lub protokolu z punktami zawodnikow, albo
 #  - dane nie byly odswiezane od 2 h po rozpoczeciu meczu.
 # Szerokie okno, bo GitHub czesto pomija zaplanowane uruchomienia (cron) - waskie okno 2-3 h bylo przegapiane.
@@ -38,11 +39,27 @@ foreach ($lg in $Config.leagues) {
   $rows = @($m.box.home).Count + @($m.box.away).Count
   $missing = (-not $m.played) -or ($rows -eq 0)
   $label = "$($lg.label) $($m.date) $($m.time) $($data.teams.($m.home).short) - $($data.teams.($m.away).short)"
-  if ($hours -lt 2 -or $hours -ge 12) { continue }
+  if ($hours -lt 2 -or $hours -ge 72) { continue }
+  # 12-72 h po meczu: wynik czesto wpisywany pozno - sprawdzaj co 3 h, zeby nie obciazac kozkosz.pl
+  if ($hours -ge 12) {
+   if ($missing -and ((-not $genUtc) -or ($nowUtc - $genUtc).TotalHours -ge 3)) { $run = $true; $reasons += "nadal brak wyniku/protokolu ($([math]::Round($hours,1)) h po meczu, sprawdzam co 3 h): $label" }
+   continue
+  }
   $stale = (-not $genUtc) -or ($genUtc -lt $startUtc.AddHours(2))
   if ($missing) { $run = $true; $reasons += "brak wyniku/protokolu ($([math]::Round($hours,1)) h po meczu): $label" }
   elseif ($stale) { $run = $true; $reasons += "dane sprzed konca meczu: $label" }
  }
+ # Stale odswiezenia (GitHub czesto pomija swoje crony): codziennie 04:00 UTC oraz sob./niedz. 20:00 UTC.
+ # Jesli ostatni taki termin minal, a dane sa starsze - pelna aktualizacja.
+ $slot = $null
+ for ($d = 0; $d -le 2 -and -not $slot; $d++) {
+  $day = $nowUtc.Date.AddDays(-$d)
+  $cands = @($day.AddHours(4))
+  if ($day.DayOfWeek -eq 'Saturday' -or $day.DayOfWeek -eq 'Sunday') { $cands += $day.AddHours(20) }
+  $past = @($cands | Where-Object { $_ -le $nowUtc } | Sort-Object -Descending)
+  if ($past.Count) { $slot = $past[0] }
+ }
+ if ($slot -and ((-not $genUtc) -or $genUtc -lt $slot)) { $run = $true; $reasons += "zaplanowane odswiezenie $($slot.ToString('yyyy-MM-dd HH:mm')) UTC nie bylo wykonane: rocznik $($lg.label)" }
 }
 
 if ($reasons.Count) { $reasons | ForEach-Object { Write-Host $_ } } else { Write-Host 'Brak meczow czekajacych na wynik - pomijam aktualizacje.' }
